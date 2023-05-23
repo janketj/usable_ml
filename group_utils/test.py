@@ -1,7 +1,8 @@
+from model_loader import create_model
 from model import Model
 
 
-myModel = Model()
+myModel = create_model('test')
 
 # ["Convolutional Layer", "MaxPooling Layer", "AvgPooling Layer", "Fully Connected Layer",  "Activation Layer", "Normalization Layer", "Dropout Layer"]
 

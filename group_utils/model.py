@@ -5,8 +5,10 @@ import torch.nn.functional as F
 
 class Model(nn.Module):
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
+
+        self.name = name
 
         self.globals_dict = globals()
         self.globals_dict['nn'] = nn
@@ -35,41 +37,41 @@ class Model(nn.Module):
         """
 
         layerType = {
-            "Convolutional Layer": "Conv2d", 
-            "MaxPooling Layer": "MaxPool2d", 
-            "AvgPooling Layer": "AvgPool2d", 
-            "Fully Connected Layer": "Linear",  
-            "Activation Layer": "Act", 
-            "Normalization Layer": "BatchNorm2d", 
+            "Convolutional Layer": "Conv2d",
+            "MaxPooling Layer": "MaxPool2d",
+            "AvgPooling Layer": "AvgPool2d",
+            "Fully Connected Layer": "Linear",
+            "Activation Layer": "Act",
+            "Normalization Layer": "BatchNorm2d",
             "Dropout Layer": "Dropout"
         }
 
         if " " in type:
             type =  layerType[type]
-        
+
 
         self.globals_dict['params'] = params
 
         if type == "Conv2d":
             return self.createConv(name)
-        
+
 
         if type == "MaxPool2d":
             return self.createMaxPool(name)
-        
+
 
         if type == "AvgPool2d":
             return self.createAvgPool(name)
-        
+
         if type == "Linear":
             return self.createLinear(name)
-        
+
         if type == "Act":
             return self.createActivation(name)
-        
+
         if type == "BatchNorm2d":
             return self.createNorm(name)
-        
+
 
         if type == "Dropout":
             return self.createDrop(name)
@@ -95,15 +97,15 @@ class Model(nn.Module):
         # nn.Conv3d: 3D convolutional layer.
         # nn.ConvTranspose2d: 2D transposed convolutional layer (also known as deconvolution).
 
-       
-        
+
+
         # params = {"in_channels" : Any positive integer value,
         #          "out_channels" : Any positive integer value,
-        #          "kernel_size" : A positive integer value k or  A tuple (kH, kW), 
+        #          "kernel_size" : A positive integer value k or  A tuple (kH, kW),
         #          "stride" : A positive integer value s or  A tuple (sH, sW),
         #          "padding" : 0 (No padding) or A positive integer value p or A tuple (pH, pW),
-        #          "dilation" : A positive integer value d or  A tuple (dH, dW),, 
-        #          "groups" : Any positive integer value. Default is 1, # I think we can skip this 
+        #          "dilation" : A positive integer value d or  A tuple (dH, dW),,
+        #          "groups" : Any positive integer value. Default is 1, # I think we can skip this
         #          "bias" : A Boolean value. Default is True
         #          }
 
@@ -119,14 +121,14 @@ class Model(nn.Module):
         # groups: This controls the connections between input and output channels. By default, it is set to 1, which means each input channel is connected to each output channel. For grouped convolution, you can set the groups parameter to a specific value.
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
-        
+
 
         exec(f"self.{name} = nn.Conv2d(**params)", self.globals_dict)
 
-      
+
         # for now I assume that all params are correct and the layer is created
         return True
-    
+
 
 
     def createMaxPool(self, name):
@@ -168,7 +170,7 @@ class Model(nn.Module):
         exec(f"self.{name} = nn.MaxPool2d(**params)", self.globals_dict)
         # for now I assume that all params are correct and the layer is created
         return True
-    
+
 
     def createAvgPool(self, name):
 
@@ -237,7 +239,7 @@ class Model(nn.Module):
 
         # for now I assume that all params are correct and the layer is created
         return True
-    
+
 
 
     def createActivation(self, name):
@@ -259,7 +261,7 @@ class Model(nn.Module):
             exec(f"self.{name} = nn.{name}()", self.globals_dict)
         # for now I assume that all params are correct and the layer is created
         return True
-    
+
 
 
     def createNorm(self, name):
@@ -299,7 +301,7 @@ class Model(nn.Module):
 
         # for now I assume that all params are correct and the layer is created
         return True
-    
+
     def createDrop(self, name):
 
         """
@@ -328,7 +330,7 @@ class Model(nn.Module):
 
         # for now I assume that all params are correct and the layer is created
         return True
-    
+
 
     def removeLayer(self, name):
         """
@@ -344,7 +346,7 @@ class Model(nn.Module):
         if hasattr(self, name):
             delattr(self, name)
             return True
-        
+
         else:
             print(f"No layer with name {name} exists.")
             return False
@@ -406,7 +408,7 @@ class Model(nn.Module):
             self.addLayer(typeOfLayer, name, newParams)
 
 
-        
+
         # print(layer)
         # exec(f"self.{name}.load_state_dict({newParams})", self.globals_dict)
         # print(layer)
@@ -419,7 +421,7 @@ class Model(nn.Module):
         x = F.relu(self.conv1(x))
         # x = con_new
         return F.relu(self.conv2(x))
-    
+
 
 
 
