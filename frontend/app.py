@@ -17,7 +17,7 @@ from functions import (
 )
 
 if "is_training" not in st.session_state:
-    st.session_state["is_training"] = 0
+    st.session_state.is_training = 0
 
 if "progress" not in st.session_state:
     st.session_state.progress = 0
