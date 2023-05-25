@@ -35,14 +35,11 @@ Items in **bold** are expected as a minimum feature set.
 ```
 git clone ...; cd UsableML
 ```
-2. Install the requirements into a conda environment
+2. Install the requirements 
 ```
-conda env create -f env.yaml
+pip install -r ./requirements.txt
 ```
-3. Activate your environment
-```
-conda activate UsableML
-```
+
 4. Install PyTorch into your environment.  
 Refer to this page for specific instructions: https://pytorch.org/get-started/locally/
 
