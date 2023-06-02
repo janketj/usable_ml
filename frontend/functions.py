@@ -56,3 +56,19 @@ def create_model(name, layers):
 
 def load_model(name):
     send_msg(dict(name, action="load_model"))
+
+def send_message(messageType, message: any = None):
+    send_msg(dict(messageType=messageType, content=message))
+
+def update_params():
+    values = {
+        "learning_rate": st.session_state.learning_rate,
+        "epochs": st.session_state.epochs,
+        "batch_size": st.session_state.batch_size,
+        "optimizer": st.session_state.optimizer.props.value,
+    }
+    print(values)
+    send_message(
+        "update_global_parameters",
+        values,
+    )

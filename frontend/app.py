@@ -3,7 +3,7 @@ import streamlit as st
 import zmq
 import numpy as np
 import time
-from streamlit_elements import elements, mui, html, nivo
+from streamlit_elements import elements, mui, sync, nivo
 import pandas as pd
 from app_style import apply_style
 from functions import (
@@ -14,7 +14,10 @@ from functions import (
     remove_layer,
     create_model,
     load_model,
+    update_params,
 )
+from components import global_parameter
+from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS
 
 if "is_training" not in st.session_state:
     st.session_state.is_training = 0
@@ -22,65 +25,22 @@ if "is_training" not in st.session_state:
 if "progress" not in st.session_state:
     st.session_state.progress = 0
 
-if "learn_params" not in st.session_state:
-    st.session_state.learning_rate = 0
+if "learning_rate" not in st.session_state:
+    st.session_state.learning_rate = 7
     st.session_state.batch_size = 256
     st.session_state.epochs = 10
+    st.session_state.optimizer = {
+        "props": {"value": "SGD", "children": "Stochastic Gradient Descent"}
+    }
 
 if "model_name" not in st.session_state:
     st.session_state.model_name = "test"
 
-PLACEHOLDER_ACCURACY = [
-    {
-        "id": "accuracy",
-        "color": "#0f0",
-        "data": [
-            {"x": "0", "y": 39},
-            {"x": "1", "y": 44},
-            {"x": "2", "y": 50},
-            {"x": "3", "y": 55},
-            {"x": "4", "y": 56},
-            {"x": "5", "y": 57},
-            {"x": "6", "y": 60},
-            {"x": "7", "y": 61},
-            {"x": "8", "y": 62},
-            {"x": "9", "y": 63},
-            {"x": "10", "y": 64},
-            {"x": "11", "y": 65},
-            {"x": "12", "y": 66},
-        ],
-    }
-]
-
-PLACEHOLDER_LOSS = [
-    {
-        "id": "loss",
-        "color": "#f00",
-        "data": [
-            {"x": "0", "y": 67},
-            {"x": "1", "y": 60},
-            {"x": "2", "y": 55},
-            {"x": "3", "y": 50},
-            {"x": "4", "y": 45},
-            {"x": "5", "y": 44},
-            {"x": "6", "y": 43},
-            {"x": "7", "y": 42},
-            {"x": "8", "y": 40},
-            {"x": "9", "y": 39},
-            {"x": "10", "y": 38},
-            {"x": "11", "y": 36},
-            {"x": "12", "y": 34},
-        ],
-    }
-]
-
-
 apply_style()
 
-train_tab, model_tab, test_tab = st.tabs(["TRAIN", "MODEL", "EVALUATION"])
+train_tab, model_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])
 
 with train_tab:
-    st.header("TRAINING")
     with elements("train_tab"):
         with mui.Box(
             sx={
@@ -93,20 +53,56 @@ with train_tab:
                 "justifyContent": "space-evenly",
             }
         ):
-            with mui.Stack(direction="row", sx={"width": "40%", "margin": "16px"}):
-                mui.Typography("learning rate")
-                mui.Slider(
-                    label="learning rate",
-                    defaultValue=20,
-                    value=st.session_state.learning_rate,
+            with mui.Box(
+                sx={
+                    "width": "40%",
+                    "padding": "8px",
+                    "borderRadius": "8px",
+                    "background": COLORS["bg-light"],
+                }
+            ):
+                mui.Typography(
+                    "Global Training Parameters",
+                    sx={
+                        "width": "100%",
+                    },
                 )
+                with mui.Stack(
+                    direction="column", sx={"paddingTop": "8px"}, spacing="8px"
+                ):
+                    global_parameter(
+                        "Learning Rate",
+                        "learning_rate",
+                        type="slider",
+                        sliderRange=[3, 100],
+                    )
+                    global_parameter(
+                        "Epochs", "epochs", type="slider", sliderRange=[1, 30]
+                    )
+                    global_parameter(
+                        "Batch Size", "batch_size", type="slider", sliderRange=[5, 500]
+                    )
+                    global_parameter(
+                        "Loss Function",
+                        "optimizer",
+                        options=[
+                            {"label": "Stochastic Gradient Descent", "key": "SGD"},
+                            {"label": "Gradient Descent", "key": "GD"},
+                        ],
+                        type="select",
+                    )
+                    with mui.Button(
+                        onClick=update_params, sx={"width": "50%", "margin": "auto"}
+                    ):
+                        mui.Typography("Update Parameters", sx={"width": "80%"})
+                        mui.icon.Send()
             with mui.Stack(
                 sx={"width": "60%", "maxHeight": 500, "height": 500, "margin": "16px"}
             ):
                 nivo.Line(
                     height=300,
                     data=PLACEHOLDER_ACCURACY,
-                    margin={ "bottom": 50},
+                    margin={"bottom": 50},
                 )
                 nivo.Line(
                     height=200,
