@@ -36,12 +36,29 @@ def pause_training():
     st.session_state.is_training = 0
     send_text_message("stop_training")
 
+def reset_training():
+    st.session_state.is_training = 0
+    st.session_state.progress = 0
+    send_text_message("reset_training")
+
 
 def count_progress():
     if "progress" not in st.session_state:
         st.session_state.progress = 0
     elif st.session_state.progress < 100 and st.session_state.is_training:
         st.session_state.progress += 1
+
+def skip_forward():
+    if "progress" not in st.session_state:
+        st.session_state.progress = 0
+    elif st.session_state.progress < 96:
+        st.session_state.progress += 5
+
+def skip_backward():
+    if "progress" not in st.session_state:
+        st.session_state.progress = 0
+    elif st.session_state.progress > 4:
+        st.session_state.progress -= 5
 
 def add_layer(type,name,params):
     send_msg(dict( type,name,params, action="add_layer"))

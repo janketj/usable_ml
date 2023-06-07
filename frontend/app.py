@@ -16,7 +16,9 @@ from functions import (
     load_model,
     update_params,
 )
-from components import global_parameter
+from parameter import global_parameter
+from play_bar import play_bar
+from model_dashboard import model_dashboard
 from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS
 
 if "is_training" not in st.session_state:
@@ -35,6 +37,9 @@ if "learning_rate" not in st.session_state:
 
 if "model_name" not in st.session_state:
     st.session_state.model_name = "test"
+
+if "is_expanded" not in st.session_state:
+    st.session_state.is_expanded = False
 
 apply_style()
 
@@ -111,29 +116,10 @@ with train_tab:
 
 
 with model_tab:
-    st.header("Model")
-    with elements("model_tab"):
-        with mui.Box(
-            sx={
-                "bgcolor": "background.paper",
-                "boxShadow": 1,
-                "borderRadius": 2,
-                "p": 2,
-                "minWidth": "100%",
-                "minHeight": 500,
-            }
-        ):
-            with mui.Button(onClick=add_layer):
-                mui.icon.Add()
-            with mui.Button(onClick=remove_layer):
-                mui.icon.Remove()
-            with mui.Button(onClick=load_model):
-                mui.icon.Upload()
-            with mui.Button(onClick=create_model):
-                mui.icon.Create()
+    with elements("model_dashboard"):
+        model_dashboard()
 
 with test_tab:
-    st.header("Evaluation")
     with elements("test_tab"):
         with mui.Box(
             sx={
@@ -155,27 +141,4 @@ with test_tab:
                 )
 
 
-with elements("play_bar"):
-    with mui.Box(
-        sx={
-            "bgcolor": "background.paper",
-            "boxShadow": 1,
-            "borderRadius": 2,
-            "p": 2,
-            "display": "flex",
-            "justifyContent": "flex-start",
-        }
-    ):
-        if st.session_state.is_training:
-            with mui.Button(onClick=pause_training):
-                mui.icon.Pause()
-        else:
-            with mui.Button(onClick=start_training):
-                mui.icon.PlayArrow()
-        with mui.Button(onClick=count_progress):
-            mui.icon.PlusOne()
-        mui.LinearProgress(
-            variant="determinate",
-            value=st.session_state.progress,
-            sx={"width": "70vw", "margin": "auto"},
-        )
+play_bar()
