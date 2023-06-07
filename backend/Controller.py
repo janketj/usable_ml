@@ -8,7 +8,7 @@ class Observer(ABC):
     """
 
     @abstractmethod
-    def update(self, messageType: MessageType, message: any) -> None:
+    def update(self, messageType: MessageType, message: any, userId: any) -> None:
         """
         Receive updates about subscribed message types.
         """
@@ -34,7 +34,7 @@ class Observable(ABC):
         pass
 
     @abstractmethod
-    def notify(self, messageType: MessageType, message: any) -> None:
+    def notify(self, messageType: MessageType, message: any, userId: any) -> None:
         """
         Notify all observers about an event.
         """
@@ -50,7 +50,7 @@ class Controller(Observable):
     def start(self):
         """
         This is the main function of the controller. It runs in its own
-        process and reads tasks from the queue. It will broadcast these 
+        process and reads tasks from the queue. It will broadcast these
         messages to all observers that are subscribed to the message type.
         """
         print(f"Controller is live.")
@@ -59,8 +59,8 @@ class Controller(Observable):
                 print("Stopped due to interrupt")
                 break
 
-            messageType, messageContent = self.queue.get()
-            self.notify(messageType, messageContent)
+            messageType, messageContent, userId = self.queue.get()
+            self.notify(messageType, messageContent, userId)
             self.queue.task_done()
 
     def register(self, messageType: MessageType, observer: Observer) -> None:
@@ -68,7 +68,7 @@ class Controller(Observable):
         Allows different actors to subscribe to specific message types
         coming in from the frontend.
 
-        The controller will notify the observer with the message whenever 
+        The controller will notify the observer with the message whenever
         a message of type messageType comes in.
         """
         currentObservers = self.subscribers.get(messageType, set())
@@ -80,18 +80,18 @@ class Controller(Observable):
         Allows different actors to unsubscribe to specific message types
         coming in from the frontend.
 
-        The controller will stop notifying the observer with messages 
+        The controller will stop notifying the observer with messages
         of type messageType.
         """
         currentObservers = self.subscribers.get(messageType, set())
         currentObservers.remove(observer)
         self.subscribers[messageType] = currentObservers
 
-    def notify(self, messageType: MessageType, message: any) -> None:
+    def notify(self, messageType: MessageType, message: any, userId: any) -> None:
         """
         Notify all subscribed observers about the event.
         """
         currentObservers = self.subscribers.get(messageType, set())
 
         for observer in currentObservers:
-            observer.update(messageType, message)
+            observer.update(messageType, message, userId)
