@@ -41,12 +41,29 @@ def pause_training():
     st.session_state.is_training = 0
     send_message(MessageType.STOP_TRAINING)
 
+def reset_training():
+    st.session_state.is_training = 0
+    st.session_state.progress = 0
+    send_message("reset_training")
+
 
 def count_progress():
     if "progress" not in st.session_state:
         st.session_state.progress = 0
     elif st.session_state.progress < 100 and st.session_state.is_training:
         st.session_state.progress += 1
+
+def skip_forward():
+    if "progress" not in st.session_state:
+        st.session_state.progress = 0
+    elif st.session_state.progress < 96:
+        st.session_state.progress += 5
+
+def skip_backward():
+    if "progress" not in st.session_state:
+        st.session_state.progress = 0
+    elif st.session_state.progress > 4:
+        st.session_state.progress -= 5
 
 def add_layer(type,name,params):
     send_message(MessageType.ADD_LAYER, dict( type,name,params, action="add_layer"))
@@ -61,3 +78,16 @@ def create_model(name, layers):
 
 def load_model(name):
     send_message(MessageType.LOAD_MODEL, dict(name, action="load_model"))
+
+def update_params():
+    values = {
+        "learning_rate": st.session_state.learning_rate,
+        "epochs": st.session_state.epochs,
+        "batch_size": st.session_state.batch_size,
+        "optimizer": st.session_state.optimizer.props.value,
+    }
+    print(values)
+    send_message(
+        "update_global_parameters",
+        values,
+    )
