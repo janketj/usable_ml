@@ -42,11 +42,12 @@ def layer(l, is_open):
 def block_adder(block):
     def add_block():
         print(f'insert after index {block["index"]}')
+        st.session_state.is_expanded = False
         st.session_state.block_form_open = block["index"]
 
     if st.session_state.block_form_open == block["index"]:
         with st.form(f'add_block_at_{block["index"]}', clear_on_submit=True):
-            st.write("Add new Block")
+            st.write(f'Add new Block after Block {block["index"]}')
             block_type = st.selectbox(
                 "Block type",
                 ("FCBlock", "ConvBlock", "Blub"),
@@ -149,6 +150,6 @@ def model_dashboard():
             "alignItems": "center",
         },
     ):
-        for b in st.session_state.model:
+        for b in st.session_state.model: # something like iterator(model.head)
             block(b)
             block_adder(b)
