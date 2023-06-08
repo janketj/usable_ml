@@ -18,8 +18,8 @@ from functions import (
 )
 from parameter import global_parameter
 from play_bar import play_bar
-from model_dashboard import model_dashboard
-from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS
+from model_page import model_dashboard
+from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS, PLACEHOLDER_BLOCKS
 
 if "is_training" not in st.session_state:
     st.session_state.is_training = 0
@@ -40,6 +40,15 @@ if "model_name" not in st.session_state:
 
 if "is_expanded" not in st.session_state:
     st.session_state.is_expanded = False
+
+if "block_form_open" not in st.session_state:
+    st.session_state.block_form_open = False
+
+if "model" not in st.session_state:
+    st.session_state.model = PLACEHOLDER_BLOCKS
+
+if "new_block" not in st.session_state:
+    st.session_state.new_block = False
 
 apply_style()
 
