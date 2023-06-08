@@ -5,11 +5,14 @@ import numpy as np
 import time
 import pandas as pd
 
-
+from backend.MessageType import MessageType
 
 context = zmq.Context()
 
-def send_msg(msg, receiver: str = "tcp://localhost:5555"):
+def init_user():
+    send_message(MessageType.INIT_USER)
+
+def send(msg, receiver: str = "tcp://localhost:5555"):
     print("Connecting to server…")
     socket = context.socket(zmq.REQ)
     socket.connect(receiver)
@@ -19,27 +22,29 @@ def send_msg(msg, receiver: str = "tcp://localhost:5555"):
     socket.close()
 
 
-def send_text_message(message):
-    send_msg(dict(task_description=message, duration=st.session_state.progress))
+def send_message(messageType: MessageType, message: any = None):
+    user_id = st.session_state.user_id
+    print(f"Sending message {messageType} to {user_id}")
+    send(dict(messageType=messageType, content=message, userId=str(user_id)))
 
 
 def interrupt():
-    send_msg("Interrupt")
+    send_message(MessageType.INTERRUPT)
 
 
 def start_training():
     st.session_state.is_training = 1
-    send_text_message("start_training")
+    send_message(MessageType.START_TRAINING)
 
 
 def pause_training():
     st.session_state.is_training = 0
-    send_text_message("stop_training")
+    send_message(MessageType.STOP_TRAINING)
 
 def reset_training():
     st.session_state.is_training = 0
     st.session_state.progress = 0
-    send_text_message("reset_training")
+    send_message("reset_training")
 
 
 def count_progress():
@@ -61,21 +66,18 @@ def skip_backward():
         st.session_state.progress -= 5
 
 def add_layer(type,name,params):
-    send_msg(dict( type,name,params, action="add_layer"))
+    send_message(MessageType.ADD_LAYER, dict( type,name,params, action="add_layer"))
 
 def remove_layer(name):
-    send_msg(dict(name, action="remove_layer"))
+    send_message(MessageType.REMOVE_LAYER, dict(name, action="remove_layer"))
 
 def create_model(name, layers):
-    send_msg(dict(name, action="create_model"))
+    send_message(MessageType.CREATE_MODEL, dict(name, action="create_model"))
     for layer in layers:
         add_layer(*layer)
 
 def load_model(name):
-    send_msg(dict(name, action="load_model"))
-
-def send_message(messageType, message: any = None):
-    send_msg(dict(messageType=messageType, content=message))
+    send_message(MessageType.LOAD_MODEL, dict(name, action="load_model"))
 
 def update_params():
     values = {

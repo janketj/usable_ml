@@ -5,8 +5,9 @@ import numpy as np
 import time
 from streamlit_elements import elements, mui, sync, nivo
 import pandas as pd
-from app_style import apply_style
-from functions import (
+import uuid
+from frontend.app_style import apply_style
+from frontend.functions import (
     start_training,
     pause_training,
     count_progress,
@@ -15,11 +16,24 @@ from functions import (
     create_model,
     load_model,
     update_params,
+    init_user,
 )
 from parameter import global_parameter
 from play_bar import play_bar
 from model_page import model_dashboard
 from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS, PLACEHOLDER_BLOCKS
+
+user_id = st.experimental_get_query_params().get("user_id", None)
+if user_id is not None:
+    user_id = str(user_id[0])
+
+if user_id is None:
+    user_id = uuid.uuid4()
+    st.experimental_set_query_params(user_id=user_id)
+
+if "user_id" not in st.session_state:
+    st.session_state.user_id = user_id
+    init_user()
 
 if "is_training" not in st.session_state:
     st.session_state.is_training = 0

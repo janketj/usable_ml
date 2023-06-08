@@ -5,6 +5,9 @@ from model import Model
 # Global variable for the models directory
 models_dir = "models"
 
+# Retain models in memory for each user
+user_models = {}
+
 
 def save_model(model):
     """
@@ -20,7 +23,7 @@ def save_model(model):
 
 def load_model(name):
     """
-    Load a model from a file.
+    Checks if model is loaded in memory otherwise load model from a file.
 
     Args:
         name: The name of the model to load.
@@ -28,11 +31,15 @@ def load_model(name):
     Returns:
         The loaded model, or None if the model file doesn't exist.
     """
+    if name in user_models:
+        return user_models[name]
+
     filename = os.path.join(models_dir, f"{name}.pt")
     if not os.path.isfile(filename):
         return None
     model = Model(name)
     model.load_state_dict(torch.load(filename))
+    user_models[name] = model
     return model
 
 
