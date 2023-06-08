@@ -6,8 +6,8 @@ import time
 from streamlit_elements import elements, mui, sync, nivo
 import pandas as pd
 import uuid
-from frontend.app_style import apply_style
-from frontend.functions import (
+from app_style import apply_style
+from functions import (
     start_training,
     pause_training,
     count_progress,
