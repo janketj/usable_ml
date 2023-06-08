@@ -47,13 +47,14 @@ Refer to this page for specific instructions: https://pytorch.org/get-started/lo
 Activate the environment
 ```
 conda activate UsableML
-````
+```
 Run the backend
 ```
 python backend.py
 ```
 Run the frontend
 ```
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 streamlit run app.py
 ```
 
