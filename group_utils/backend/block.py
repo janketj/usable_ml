@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import math
 
 
 class Block(nn.Module):
@@ -9,7 +10,22 @@ class Block(nn.Module):
         super().__init__()
 
         self.name = name 
-        self.next = next 
+
+        self.next = None
+        self.pervious = None
+
+        if next is not None:
+            self.assigeNext(next)
+
+
+        self.norm = None 
+        self.activ = None  
+        self.drop = None
+
+        self.normParamas = None
+        self.activType = None
+        self.dropParamas = None
+        
 
         self.globals_dict = globals()
         self.globals_dict['nn'] = nn
@@ -18,11 +34,14 @@ class Block(nn.Module):
 
     def assigeNext(self, next):
         self.next = next
-
+        print(self.next)
+        self.next.pervious = self
+        
 
     def deleteNext(self):
+        self.next.pervious = None
         self.next = None
-
+        
 
 
 
@@ -42,6 +61,7 @@ class Block(nn.Module):
 
         if self.activ is None:
             exec(f"self.activ  = nn.{type}()", self.globals_dict)
+            self.activType = type
             return True
         else:
             print("The block already has a activation layer.")
@@ -75,6 +95,7 @@ class Block(nn.Module):
 
         if self.norm is None:
             self.norm  = nn.BatchNorm2d(**params)
+            self.normParamas = params
             return True
         else:
             print("The block already has a normalization layer.")
@@ -104,6 +125,7 @@ class Block(nn.Module):
 
         if self.drop is None and self.next is None:
             self.drop  = nn.Dropout(**params)
+            self.dropParamas = params
             return True
         else:
             print("The block already has a dropout layer or it is final block.")
@@ -216,13 +238,20 @@ class ConvBlock(Block):
 
     
     def __init__(self, name, next):
-        super().__init__(name, next) 
-
+        super().__init__(name,  next)
+        
         self.conv = None
-        self.norm = None 
-        self.activ = None  
-        self.drop = None
         self.pool = None 
+
+
+        self.convParamas = None
+        self.poolParamas = None 
+
+        self.outputDim = None
+
+        #dummy params
+        params = {"in_channels" : None, "out_channels" : 3, "kernel_size" : (3, 3)} 
+        self.createConv(params)
 
          
 
@@ -263,7 +292,15 @@ class ConvBlock(Block):
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
         if self.conv is None:
+
+            if self.pervious is not None:
+                params["in_channels"] = self.pervious.outputDim[0]
+            else:
+                params["in_channels"] = 1
+
             self.conv = nn.Conv2d(**params)
+            self.convParamas = params
+            self.mutateOutputDim()
             return True
         else:
             print("The block already has a convolutional layer.")
@@ -282,6 +319,8 @@ class ConvBlock(Block):
         Returns:
             bool:  True if the layer is added, False otherwise
         """
+
+        self.poolParamas = params
         type = params["type"]
         params = params["params"]
 
@@ -326,6 +365,7 @@ class ConvBlock(Block):
 
         if self.pool is None:
             self.pool = nn.MaxPool2d(**params)
+            self.mutateOutputDim()
             return True
         
         else:
@@ -366,11 +406,47 @@ class ConvBlock(Block):
 
         if self.pool is None:
             self.pool = nn.AvgPool2d(**params)
+            self.mutateOutputDim()
             return True
         
         else:
             print("The block already has a pooling layer.")
             return False
+        
+    def mutateOutputDim(self):
+
+        # Input dimensions
+        if self.pervious is not None:
+            inputWidth, inputHeight, _  = self.pervious.outputDim
+        else:
+            inputWidth, inputHeight, _  = (28, 28, 1)
+
+
+        # Convolutional layer parameters
+        kernel_size = self.conv.kernel_size
+        stride = self.conv.stride
+        padding = self.conv.padding
+        num_filters = self.conv.out_channels
+
+        
+        # Calculate output size for the convolutional layer
+        outWidth = math.floor((inputWidth - kernel_size[0] + 2 * padding[0]) / stride[0]) + 1
+        outHeight = math.floor((inputHeight - kernel_size[1]+ 2 * padding[1]) / stride[1]) + 1
+        outChannels = num_filters
+
+
+        # Pooling layer parameters
+        if self.pool is not None:
+            pool_size = self.pool.kernel_size
+            pool_stride = self.pool.stride
+
+            # Calculate output size for the pooling layer
+            outWidth = math.floor((outWidth - pool_size) / pool_stride) + 1
+            outHeight = math.floor((outHeight - pool_size) / pool_stride) + 1
+
+        self.outputDim = (outWidth, outHeight, outChannels)
+
+
 
 
     def forward(self, x):
@@ -402,9 +478,16 @@ class FCBlock(Block):
         super().__init__(name, next) 
 
         self.linear = None 
-        self.norm = None 
-        self.activ = None 
-        self.drop = None 
+
+        self.outputDim = None
+
+        self.linearParams = None 
+
+        #dummy params
+        params = {"in_features" : 10, "out_features" : 10}
+        self.createLinear(params)
+
+
 
 
     def createLinear(self, params):
@@ -429,13 +512,44 @@ class FCBlock(Block):
         # out_features: Data type: int. Specifies the size of each output sample. It represents the number of output features.
         # bias: Data type: bool, optional. Specifies whether to include a bias term in the linear transformation. Default is True. If set to False, the layer will not learn an additive bias.
         
-        
-        if self.linear is not None:
+
+        if self.linear is None:
+                if self.pervious is not None:
+                    if isinstance(self.pervious , ConvBlock):
+                        params["in_features"]  = self.pervious.outputDim[0] * self.pervious.outputDim[1] * self.pervious.outputDim[2]
+                    elif isinstance(self.pervious , FCBlock):
+                       params["in_features"]  = self.pervious.outputDim
+
+                if self.next is  None:
+                    params["out_features"]  = 10
+
+
                 self.linear = nn.Linear(**params)
+                self.linearParams = params
+                self.mutateOutputDim()
                 return True
         else:
             print("The block already has a fully conected linear layer.")
             return False
+        
+    def assigeNext(self, next):
+        if isinstance(next , FCBlock):
+            return super().assigeNext(next)
+        else:
+            print("After a fully connected block, you are not allowed to have a Conv layer")
+
+    
+    def deleteNext(self):
+        super().deleteNext()
+        self.linearParams["out_features"]  = 10
+        self.changeLayerParameters(self, "linear", self.linearParams)
+        return super().deleteNext()
+
+    def mutateOutputDim(self):
+
+        output = self.linear.out_features
+
+        self.outputDim =  (output)
         
 
 

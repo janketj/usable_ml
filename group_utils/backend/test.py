@@ -4,7 +4,7 @@ from block import *
 
 model = Model()
 
-blockConv = ConvBlock("Block 1", None)
+blockConv = ConvBlock("Block 1",  None)
 
 ## Convolutional Layer
 params = {
@@ -80,5 +80,13 @@ print("Dropout Layer \n", blockConv.drop)
 print()
 
 model.head = blockConv
+
+
+
+
+full = FCBlock("new", None)
+print("Fully con Layer \n", full.linear)
+
+full_2 = FCBlock("new",blockConv)
 print("Done_____________!")
 
