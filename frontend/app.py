@@ -21,7 +21,7 @@ from functions import (
 from parameter import global_parameter
 from play_bar import play_bar
 from model_page import model_dashboard
-from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS, PLACEHOLDER_BLOCKS
+from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS, PLACEHOLDER_MODEL
 
 user_id = st.experimental_get_query_params().get("user_id", None)
 if user_id is not None:
@@ -49,24 +49,27 @@ if "learning_rate" not in st.session_state:
         "props": {"value": "SGD", "children": "Stochastic Gradient Descent"}
     }
 
-if "model_name" not in st.session_state:
-    st.session_state.model_name = "test"
-
 if "is_expanded" not in st.session_state:
-    st.session_state.is_expanded = False
+    st.session_state.is_expanded = None
+
+if "edit_block" not in st.session_state:
+    st.session_state.edit_block = None
 
 if "block_form_open" not in st.session_state:
-    st.session_state.block_form_open = False
+    st.session_state.block_form_open = None
+
+if "model_creator_open" not in st.session_state:
+    st.session_state.model_creator_open = False
+
+if "model_name" not in st.session_state:
+    st.session_state.model_name = PLACEHOLDER_MODEL["name"]
 
 if "model" not in st.session_state:
-    st.session_state.model = PLACEHOLDER_BLOCKS
-
-if "new_block" not in st.session_state:
-    st.session_state.new_block = False
+    st.session_state.model = PLACEHOLDER_MODEL
 
 apply_style()
 
-train_tab, model_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])
+model_tab,train_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])
 
 with train_tab:
     with elements("train_tab"):

@@ -1,15 +1,12 @@
-from model_loader import create_model
-from model import Model
+from modelLinkedBlocks import Model
+from block import *
 
 
-myModel = create_model('test')
+model = Model()
 
-# ["Convolutional Layer", "MaxPooling Layer", "AvgPooling Layer", "Fully Connected Layer",  "Activation Layer", "Normalization Layer", "Dropout Layer"]
-
+blockConv = ConvBlock("Block 1",  None)
 
 ## Convolutional Layer
-type = "Convolutional Layer"
-name = "newConv"
 params = {
     "in_channels": 3,
     "out_channels": 64,
@@ -21,12 +18,11 @@ params = {
     "bias": True
 }
 
-myModel.addLayer(type, name, params)
-print(name, myModel.hasLayer(name))
-
+print(blockConv.createConv( params ))
+print("Convolutional Layer \n", blockConv.conv)
+print()
 ## MaxPooling Layer
-type = "MaxPooling Layer"
-name = "newMaxPool"
+
 params = {
     "kernel_size": 2,
     "padding": 0,
@@ -34,114 +30,63 @@ params = {
     "return_indices": False,
     "ceil_mode": False
 }
-
-myModel.addLayer(type, name, params)
-print(name, myModel.hasLayer(name))
+params = {"type": "max", "params" : params}
 
 
+print(blockConv.createPool( params ))
+print("MaxPooling Layer \n", blockConv.pool)
+print()
 
 ## AvgPooling Layer
-type = "AvgPooling Layer"
-name = "newAvgPool"
 params = {
     "kernel_size" : 3
 }
+params = {"type": "avg", "params" : params}
 
-myModel.addLayer(type, name, params)
-print(name, myModel.hasLayer(name))
-
-
-
-## Fully Connected Layer
-type = "Fully Connected Layer"
-name = "newFC"
-params = {
-    "in_features": 256,
-    "out_features": 128,
-    "bias": True
-}
-
-myModel.addLayer(type, name, params)
-print(name, myModel.hasLayer(name))
+print(blockConv.createPool( params ))
+print("AvgPooling Layer \n", blockConv.pool)
+print()
 
 
 ## Activation Layer
 
-type = "Activation Layer"
-name = "Tanh"
-params = None
+type = "Tanh"
 
-myModel.addLayer(type, name, params)
-print(name, myModel.hasLayer(name))
+print(blockConv.createActiv( type ))
+print("Activation Layer Layer \n", blockConv.activ)
+print()
 
 
 
 #Normalization Layer
-type = "Normalization Layer"
-name = "newNorm"
+
 params = {
     "num_features": 3
 
 }
 
-myModel.addLayer(type, name, params)
-print(name, myModel.hasLayer(name))
+print(blockConv.createNorm( params ))
+print("Normalization Layer \n", blockConv.norm)
+print()
 
 
 # Dropout Layer
 type = "Dropout Layer"
 name = "newDrop"
-params = {
+params = {}
 
+print(blockConv.createDrop( params ))
+print("Dropout Layer \n", blockConv.drop)
+print()
 
-}
-
-myModel.addLayer(type, name, params)
-print(name, myModel.hasLayer(name))
-
-
-print("Done adding a layer!")
-print("_________________________________")
-
-name = "newNorm"
-myModel.removeLayer(name)
-print(name, not myModel.hasLayer(name))
-print("Done removing a layer!")
-print("_________________________________")
+model.head = blockConv
 
 
 
-name = "newConv"
-newParams = {
-    "in_channels": 3,
-    "out_channels": 30,
-    "kernel_size": (2, 2),
-    "stride": (1, 1),
-    "padding": (1, 1),
-    "dilation": (1, 1),
-    "groups": 1,
-    "bias": True
-}
-print(getattr(myModel, name))
-myModel.changeLayerParameters(name, newParams)
-print(getattr(myModel, name))
-print("Done changinga layer param!")
-print("_________________________________")
 
+full = FCBlock("new", None)
+print("Fully con Layer \n", full.linear)
 
+full_2 = FCBlock("new",blockConv)
+print("Done_____________!")
 
-name = "newConv"
-print("Updated requires_grad:", getattr(myModel, name).weight.requires_grad)
-myModel.freezeLayer(name)
-print("Updated requires_grad:", getattr(myModel, name).weight.requires_grad)
-print("Done freezing layer param!")
-print("_________________________________")
-
-
-
-name = "newConv"
-print("Updated requires_grad:", getattr(myModel, name).weight.requires_grad)
-myModel.unfreezeLayer(name)
-print("Updated requires_grad:", getattr(myModel, name).weight.requires_grad)
-print("Done freezing layer param!")
-print("_________________________________")
