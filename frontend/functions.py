@@ -12,7 +12,7 @@ sio.connect("http://localhost:6000")
 
 @sio.on("*")
 def catch_all(messageType, data):
-    print(f"Received {messageType} with data {data}")
+    print(f"FRONTEND: Received {messageType} with data {data}")
 
 def init_user():
     send_message(MessageType.INIT_USER)

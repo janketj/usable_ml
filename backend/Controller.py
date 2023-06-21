@@ -67,7 +67,7 @@ class Controller(Observable):
         @sio.on('*')
         def catch_all(messageType, sid, data):
             ''' Put in queue'''
-            print(f"Received {messageType} from {sid} with data {data}")
+            print(f"BACKEND: Received {messageType} from {sid} with data {data}")
             userId = data['userId']
             data['sid'] = sid
             self.notify(messageType, data, userId, sio.emit)
