@@ -1,4 +1,5 @@
 COLORS = {
+    "bg-paper": "rgb(38,39,48)",
     "bg-primary": "rgb(14, 17, 23)",
     "bg-secondary": "rgb(0, 0, 23)",
     "bg-light": "rgb(30, 30, 40)",
@@ -9,6 +10,9 @@ COLORS = {
     "red": "#ff4b4b",
 }
 
+ACTIVATION_TYPES = ["None", "ReLU", "LeakyReLU", "Sigmoid", "Tanh", "Softmax"]
+POOLING_TYPES = ["max", "avg"]
+BLOCK_TYPES = ["FCBlock", "ConvBlock"]
 
 PLACEHOLDER_ACCURACY = [
     {
@@ -54,109 +58,81 @@ PLACEHOLDER_LOSS = [
     }
 ]
 
+BLOCK_DEFAULT_PARAMS = {
+    "in_channels": 16,
+    "out_channels": 32,
+    "Linear_bias": True,
+    "Conv_padding": 2,
+    "Conv_kernel_size": 4,
+    "Conv_stride": 1,
+    "Conv_dilation": 1,
+    "Conv_bias": True,
+    "use_Norm_layer": False,
+    "Norm_num_features": 1,
+    "Norm_out_features": 1,
+    "Norm_momentum": 0.5,
+    "Activ_type": 1,
+    "use_Drop_layer": False,
+    "Drop_p": 0.5,
+    "Drop_inplace": False,
+    "use_Pool_layer": False,
+    "Pool_type": "max",
+    "Pool_stride": 1,
+    "Pool_padding": 2,
+    "Pool_kernel_size": 4,
+}
 
-PLACEHOLDER_BLOCKS = [
-    {
-        "name": "Block 1",
-        "type": "ConvBlock",
-        "index": 1,
-        "layers": [
-            {
-                "layerType": "Conv",
-                "params": {
-                    "in_channels": 16,
-                    "out_channels": 32,
+PLACEHOLDER_MODEL = {
+    "name": "Default Model",
+    "blocks": [
+        {
+            "type": "ConvBlock",
+            "in_channels": 16,
+            "out_channels": 32,
+            "layers": {
+                "Conv": {
                     "stride": 1,
                     "padding": 2,
                     "kernel_size": 4,
                     "dilation": 0,
                     "bias": True,
                 },
-            },
-            {
-                "layerType": "Norm",
-                "params": {
+                "Norm": {
                     "num_features": 32,
                     "out_features": 32,
                     "momentum": 0.1,
-                    "affine": True,
-                    "track_running_stats": False,
                 },
-            },
-            {
-                "layerType": "Activ",
-                "params": {
+                "Activ": {
                     "type": "ReLU",
                 },
-            },
-            {
-                "layerType": "Drop",
-                "params": {"p": 0.05, "inplace": True},
-            },
-            {
-                "layerType": "Pool",
-                "params": {"type": "max"},
-            },
-        ],
-    },
-    {
-        "name": "Block 2",
-        "type": "FCBlock",
-        "index": 2,
-        "layers": [
-            {
-                "layerType": "Linear",
-                "params": {
-                    "in_channels": 16,
-                    "out_channels": 32,
-                    "bias": True,
+                "Drop": {"p": 0.05, "inplace": True},
+                "Pool": {
+                    "type": "max",
+                    "stride": 1,
+                    "padding": 2,
+                    "kernel_size": 4,
+                    "dilation": 0,
                 },
             },
-            {
-                "layerType": "Norm",
-                "params": {
+        },
+        {
+            "type": "FCBlock",
+            "in_channels": 32,
+            "out_channels": 16,
+            "layers": {
+                "Linear": {
+                    "bias": True,
+                },
+                "Norm": {
                     "num_features": 32,
                     "out_features": 32,
                     "momentum": 0.1,
-                    "affine": True,
-                    "track_running_stats": False,
                 },
-            },
-            {
-                "layerType": "Activ",
-                "params": {
+                "Activ": {
                     "type": "ReLU",
                 },
+                "Drop": {"p": 0.05, "inplace": True},
             },
-            {
-                "layerType": "Drop",
-                "params": {"p": 0.05, "inplace": True},
-            },
-        ],
-    },
-    {
-        "name": "Block 3",
-        "type": "FCBlock",
-        "index": 3,
-        "layers": [
-            {
-                "layerType": "Linear",
-                "params": {
-                    "in_channels": 16,
-                    "out_channels": 32,
-                    "bias": True,
-                },
-            },
-            {
-                "layerType": "Norm",
-                "params": {
-                    "num_features": 32,
-                    "out_features": 32,
-                    "momentum": 0.1,
-                    "affine": True,
-                    "track_running_stats": False,
-                },
-            },
-        ],
-    },
-]
+        },
+    ],
+}

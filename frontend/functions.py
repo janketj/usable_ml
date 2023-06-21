@@ -33,6 +33,8 @@ def interrupt():
 
 
 def start_training():
+    if "progress" not in st.session_state or st.session_state.progress == 0:
+        send_message(MessageType.START_TRAINING, dict(model="blub")) # TODO: initialize model with default model?
     st.session_state.is_training = 1
     send_message(MessageType.START_TRAINING)
 
