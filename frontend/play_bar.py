@@ -39,13 +39,8 @@ def play_bar():
                         value=st.session_state.progress,
                         valueLabelDisplay="auto",
                         min=0,
-                        max=100,
-                        marks=[
-                            {
-                                "value": 25,
-                                "label": "changed XY",
-                            },
-                        ],
+                        max=st.session_state.epochs,
+                        marks=st.session_state.training_events,
                         sx={"width": "80%", "margin": "auto"},
                     )
             with mui.Button(onClick=skip_forward):

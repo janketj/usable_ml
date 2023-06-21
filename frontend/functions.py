@@ -1,8 +1,4 @@
-from time import sleep
 import streamlit as st
-import numpy as np
-import time
-import pandas as pd
 import socketio
 
 from backend.MessageType import MessageType
@@ -10,12 +6,34 @@ from backend.MessageType import MessageType
 sio = socketio.Client()
 sio.connect("http://localhost:6000")
 
+
 @sio.on("*")
-def catch_all(messageType, data):
+def catch_all(messageType, data=None):
     print(f"FRONTEND: Received {messageType} with data {data}")
+    if messageType == "update_params":
+        add_training_event(data)
+
+
+# Hier ist das Problem: der session state scheint nicht initialisiert zu sein
+# weil man in einem anderen Thread ist
+# Kriege folgenden Fehler:
+# Thread 'Thread-12 (_handle_eio_message)': missing ScriptRunContext
+# und dann ... KeyError: 'st.session_state has no key "batch_size"
+def to_progress(epoch, batch):
+    b_percent = batch / st.session_state.batch_size
+    return epoch + b_percent
+def add_training_event(data):
+    t_event = {
+        "value": to_progress(data["epoch"], data["batch"]),
+        "label": data["message"],
+    }
+    st.session_state.training_events.append(t_event)
+    print("updated parameters", data)
+
 
 def init_user():
     send_message(MessageType.INIT_USER)
+
 
 def send(msg, receiver: str = "tcp://localhost:5555"):
     print("Connecting to server…")
@@ -36,7 +54,9 @@ def interrupt():
 
 def start_training():
     if "progress" not in st.session_state or st.session_state.progress == 0:
-        send_message(MessageType.START_TRAINING, dict(model="blub")) # TODO: initialize model with default model?
+        send_message(
+            MessageType.START_TRAINING, dict(model="blub")
+        )  # TODO: initialize model with default model?
     st.session_state.is_training = 1
     send_message(MessageType.START_TRAINING)
 
@@ -44,6 +64,7 @@ def start_training():
 def pause_training():
     st.session_state.is_training = 0
     send_message(MessageType.STOP_TRAINING)
+
 
 def reset_training():
     st.session_state.is_training = 0
@@ -57,41 +78,46 @@ def count_progress():
     elif st.session_state.progress < 100 and st.session_state.is_training:
         st.session_state.progress += 1
 
+
 def skip_forward():
     if "progress" not in st.session_state:
         st.session_state.progress = 0
     elif st.session_state.progress < 96:
-        st.session_state.progress += 5
+        st.session_state.progress += 1
+
 
 def skip_backward():
     if "progress" not in st.session_state:
         st.session_state.progress = 0
     elif st.session_state.progress > 4:
-        st.session_state.progress -= 5
+        st.session_state.progress -= 1
 
-def add_layer(type,name,params):
-    send_message(MessageType.ADD_LAYER, dict( type,name,params, action="add_layer"))
+
+def add_layer(type, name, params):
+    send_message(MessageType.ADD_LAYER, dict(type, name, params, action="add_layer"))
+
 
 def remove_layer(name):
     send_message(MessageType.REMOVE_LAYER, dict(name, action="remove_layer"))
+
 
 def create_model(name, layers):
     send_message(MessageType.CREATE_MODEL, dict(name, action="create_model"))
     for layer in layers:
         add_layer(*layer)
 
+
 def load_model(name):
     send_message(MessageType.LOAD_MODEL, dict(name, action="load_model"))
+
 
 def update_params():
     values = {
         "learning_rate": st.session_state.learning_rate,
         "epochs": st.session_state.epochs,
         "batch_size": st.session_state.batch_size,
-        "optimizer": st.session_state.optimizer.props.value,
+        "loss_function": st.session_state.loss_function["props"]["value"],
+        "optimizer": st.session_state.optimizer["props"]["value"],
+        "use_cuda": st.session_state.use_cuda,
     }
-    print(values)
-    send_message(
-        "update_global_parameters",
-        values,
-    )
+    send_message(MessageType.UPDATE_PARAMS, values)

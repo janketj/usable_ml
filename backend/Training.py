@@ -12,6 +12,10 @@ class Training:
         self.use_cuda = False
         self.device = torch.device('cpu')
         self.is_training = False
+        self.learning_rate = None
+        self.current_epoch = 0
+        self.current_batch = 0
+        self.loss = None
 
     def update_optimizer(self, optimizer):
         self.optimizer = optimizer
@@ -24,6 +28,9 @@ class Training:
 
     def update_epochs(self, epochs):
         self.epochs = epochs
+
+    def update_learning_rate(self, learning_rate):
+        self.learning_rate = learning_rate
 
     def update_use_cuda(self, use_cuda):
         self.use_cuda = use_cuda
@@ -43,6 +50,7 @@ class Training:
 
         for epoch in range(self.epochs):
             running_loss = 0.0
+            self.current_batch = 0
 
             for i, (inputs, labels) in enumerate(train_loader):
                 # Move inputs and labels to the selected device
@@ -66,14 +74,19 @@ class Training:
                 # Print the average loss every batch
                 if (i + 1) % self.batch_size == 0:
                     batch_loss = running_loss / (self.batch_size * (i + 1))
+                    self.loss = batch_loss
                     print(f"Epoch {epoch+1}/{self.epochs}, Batch {i+1}/{len(train_loader)}, Loss: {batch_loss}")
+                
+                self.current_batch += 1
 
             epoch_loss = running_loss / len(train_loader.dataset)
+            self.loss = epoch_loss
             print(f"Epoch {epoch+1}/{self.epochs}, Loss: {epoch_loss}")
 
             if not self.is_training:
                 print("Training stopped by user.")
                 break
+            self.current_epoch += 1
 
         self.is_training = False
 
