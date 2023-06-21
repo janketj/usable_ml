@@ -30,8 +30,8 @@ class Training(Observer):
         """
         Init a user by creating a default model and training
         """
-        print(f'Init user {userId}')
         self.training = self.userTrainings[userId]
+        return 'Training initialized'
 
     def start_training(self, training, userId):
         """

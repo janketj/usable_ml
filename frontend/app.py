@@ -1,6 +1,5 @@
 from time import sleep
 import streamlit as st
-import zmq
 import numpy as np
 import time
 from streamlit_elements import elements, mui, sync, nivo
@@ -30,7 +29,6 @@ if user_id is not None:
 if user_id is None:
     user_id = uuid.uuid4()
     st.experimental_set_query_params(user_id=user_id)
-
 if "user_id" not in st.session_state:
     st.session_state.user_id = user_id
     init_user()

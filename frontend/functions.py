@@ -1,25 +1,27 @@
 from time import sleep
 import streamlit as st
-import zmq
 import numpy as np
 import time
 import pandas as pd
+import socketio
 
 from backend.MessageType import MessageType
 
-context = zmq.Context()
+sio = socketio.Client()
+sio.connect("http://localhost:6000")
+
+@sio.on("*")
+def catch_all(messageType, data):
+    print(f"Received {messageType} with data {data}")
 
 def init_user():
     send_message(MessageType.INIT_USER)
 
 def send(msg, receiver: str = "tcp://localhost:5555"):
     print("Connecting to server…")
-    socket = context.socket(zmq.REQ)
-    socket.connect(receiver)
-    socket.send_json(msg)
-    reply = socket.recv()
-    print(reply)
-    socket.close()
+    print("Sending message %s …" % msg)
+    messageType = msg["messageType"]
+    sio.emit(messageType, msg)
 
 
 def send_message(messageType: MessageType, message: any = None):

@@ -13,7 +13,6 @@ class User(Observer):
         """
         User handling specific messages
         """
-        print(f'User {userId} received message {messageType}')
         switcher = {
             MessageType.INIT_USER: self.init_user,
         }
@@ -25,11 +24,10 @@ class User(Observer):
         """
         Init a user by creating a default model and training
         """
-        print(f'Init user {userId}')
         defaultModel = create_model('default')
         self.userModels[userId] = {}
         self.userModels[userId]['default'] = defaultModel
         self.userTrainings[userId] = Training(defaultModel)
-        print(f'Print userTrainingsssss {self.userTrainings}')
+        return 'User initialized'
 
 

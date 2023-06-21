@@ -1,5 +1,5 @@
-from multiprocessing import Process, JoinableQueue, Event
-import zmq
+import multiprocessing
+from multiprocessing import Process, Queue, Event
 
 from Controller import Controller
 from TestObserver import Test
@@ -14,22 +14,26 @@ if __name__ == "__main__":
     but only handle messages and instanciate a single worker process, with which
     it will communicate through and multiprocessing queue and event.
     """
-    taskQueue = JoinableQueue()
+    multiprocessing.set_start_method('fork')
+    taskQueue = Queue()
     interruptEvent = Event()
+
+    controller = Controller(taskQueue, interruptEvent)
 
     userModels = {}
     userTrainings = {}
 
-    controller = Controller(taskQueue, interruptEvent)
     modelObserver = Model(userModels)
     trainingObserver = Training(userTrainings)
     userObserver = User(userModels, userTrainings)
 
+
     """
     Register initial observers
     """
-    controller.register(MessageType.INIT_USER, trainingObserver)
     controller.register(MessageType.INIT_USER, userObserver)
+    controller.register(MessageType.INIT_USER, modelObserver)
+    controller.register(MessageType.INIT_USER, trainingObserver)
 
     """
     Register model observers
@@ -49,27 +53,5 @@ if __name__ == "__main__":
     controller.register(MessageType.UPDATE_LOSS_FUNCTION, trainingObserver)
     controller.register(MessageType.USE_CUDA, trainingObserver)
 
-
-    workerProcess = Process(
-        target=controller.start, args=[], daemon=True
-    )
+    workerProcess = Process(target=controller.start)
     workerProcess.start()
-
-    context = zmq.Context()
-    socket = context.socket(zmq.REP)
-    socket.bind("tcp://127.0.0.1:5555")
-    while True:
-        #  Wait for next request from client
-        message = socket.recv_json()
-        messageType = message["messageType"]
-        messageContent = message["content"]
-        userId = message["userId"]
-
-        print("Received request: %s" % message)
-        if messageType == MessageType.INTERRUPT:
-            interruptEvent.set()
-            print("Set interrupt.")
-        else:
-            taskQueue.put((messageType, messageContent, userId))
-            print("Added to queue.")
-        socket.send(b"Ok.")
