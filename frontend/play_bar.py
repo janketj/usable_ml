@@ -36,7 +36,7 @@ def play_bar():
             mui.Slider(
                         name="progress",
                         label="progrss",
-                        value=st.session_state.progress,
+                        value=st.session_state.progress["p"],
                         valueLabelDisplay="auto",
                         min=0,
                         max=st.session_state.epochs,

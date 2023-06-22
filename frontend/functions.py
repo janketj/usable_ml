@@ -2,6 +2,7 @@ import streamlit as st
 import socketio
 
 from backend.MessageType import MessageType
+from session_state_dumper import dump_state, get_state
 
 sio = socketio.Client()
 sio.connect("http://localhost:6000")
@@ -12,6 +13,8 @@ def catch_all(messageType, data=None):
     print(f"FRONTEND: Received {messageType} with data {data}")
     if messageType == "update_params":
         add_training_event(data)
+    if messageType == "get_progress":
+        update_progress(data)
 
 
 # Hier ist das Problem: der session state scheint nicht initialisiert zu sein
@@ -19,16 +22,23 @@ def catch_all(messageType, data=None):
 # Kriege folgenden Fehler:
 # Thread 'Thread-12 (_handle_eio_message)': missing ScriptRunContext
 # und dann ... KeyError: 'st.session_state has no key "batch_size"
-def to_progress(epoch, batch):
-    b_percent = batch / st.session_state.batch_size
-    return epoch + b_percent
 def add_training_event(data):
+    training_events = get_state("training_events")
+
     t_event = {
-        "value": to_progress(data["epoch"], data["batch"]),
+        "value": data["at"],
         "label": data["message"],
     }
-    st.session_state.training_events.append(t_event)
-    print("updated parameters", data)
+    training_events += [t_event]
+    dump_state("training_events", training_events)
+
+
+def update_progress(data):
+    curr_status = {
+        "p": data["progress"],
+        "loss": data["loss"],
+    }
+    dump_state("progress", curr_status)
 
 
 def init_user():
@@ -72,18 +82,11 @@ def reset_training():
     send_message("reset_training")
 
 
-def count_progress():
-    if "progress" not in st.session_state:
-        st.session_state.progress = 0
-    elif st.session_state.progress < 100 and st.session_state.is_training:
-        st.session_state.progress += 1
-
-
 def skip_forward():
     if "progress" not in st.session_state:
-        st.session_state.progress = 0
-    elif st.session_state.progress < 96:
-        st.session_state.progress += 1
+        st.session_state.progress = {"p": 0, "loss": 100}
+    elif st.session_state.progress["p"] < st.session_state.epochs:
+        st.session_state.progress["p"] += 1
 
 
 def skip_backward():
@@ -110,6 +113,9 @@ def create_model(name, layers):
 def load_model(name):
     send_message(MessageType.LOAD_MODEL, dict(name, action="load_model"))
 
+
+def get_progress():
+    send_message(MessageType.GET_PROGRESS)
 
 def update_params():
     values = {

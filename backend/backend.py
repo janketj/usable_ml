@@ -48,6 +48,7 @@ if __name__ == "__main__":
     controller.register(MessageType.START_TRAINING, trainingObserver)
     controller.register(MessageType.STOP_TRAINING, trainingObserver)
     controller.register(MessageType.UPDATE_PARAMS, trainingObserver)
+    controller.register(MessageType.GET_PROGRESS, trainingObserver)
 
     workerProcess = Process(target=controller.start)
     workerProcess.start()

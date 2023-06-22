@@ -36,7 +36,7 @@ def train_page():
                     "Learning Rate",
                     "learning_rate",
                     type="slider",
-                    sliderRange=[3, 100],
+                    sliderRange=[0.01, 1],
                 )
                 global_parameter("Epochs", "epochs", type="slider", sliderRange=[1, 30])
                 global_parameter(
@@ -48,7 +48,6 @@ def train_page():
                     options=[
                         {"label": "Cross Entropy Loss", "key": "cross_entropy"},
                         {"label": "Mean Squared Error Loss", "key": "mse"},
-                        {"label": "Kullback-Leibler divergence", "key": "kl"},
                         {"label": "Negative Log-Likelihood Loss", "key": "neg_log_lik"},
                     ],
                     type="select",
@@ -58,7 +57,7 @@ def train_page():
                     "optimizer",
                     options=[
                         {"label": "Stochastic Gradient Descent", "key": "SGD"},
-                        {"label": "Gradient Descent", "key": "GD"},
+                        {"label": "Adam Optimizer", "key": "Adam"},
                     ],
                     type="select",
                 )
