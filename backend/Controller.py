@@ -36,7 +36,7 @@ class Observable(ABC):
         pass
 
     @abstractmethod
-    def notify(self, messageType: MessageType, message: any, user_id: any, model_id: any emit_function: any) -> None:
+    def notify(self, messageType: MessageType, message: any, user_id: any, model_id: any, emit_function: any) -> None:
         """
         Notify all observers about an event.
         """
