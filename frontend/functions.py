@@ -15,6 +15,9 @@ def catch_all(messageType, data=None):
         add_training_event(data)
     if messageType == "get_progress":
         update_progress(data)
+    if messageType == "create_model":
+        update_existing_models(data["id"], data["name"])
+        update_model(data)
 
 
 # Hier ist das Problem: der session state scheint nicht initialisiert zu sein
@@ -31,6 +34,17 @@ def add_training_event(data):
     }
     training_events += [t_event]
     dump_state("training_events", training_events)
+
+
+def update_existing_models(new_model_id, new_model_name):
+    existing_models = get_state("existing_models")
+
+    existing_models += [{"id": new_model_id, "name": new_model_name}]
+    dump_state("existing_models", existing_models)
+
+
+def update_model(data):
+    dump_state("model", data)
 
 
 def update_progress(data):
@@ -96,18 +110,24 @@ def skip_backward():
         st.session_state.progress -= 1
 
 
-def add_layer(type, name, params):
-    send_message(MessageType.ADD_LAYER, dict(type, name, params, action="add_layer"))
+def add_block(params):
+    send_message(MessageType.ADD_BLOCK, dict(params, action="add_block"))
 
 
-def remove_layer(name):
-    send_message(MessageType.REMOVE_LAYER, dict(name, action="remove_layer"))
+def remove_block(name):
+    send_message(MessageType.REMOVE_BLOCK, dict(name, action="remove_block"))
 
 
-def create_model(name, layers):
-    send_message(MessageType.CREATE_MODEL, dict(name, action="create_model"))
-    for layer in layers:
-        add_layer(*layer)
+def edit_block(params):
+    send_message(MessageType.EDIT_BLOCK, dict(params, action="edit_block"))
+
+
+def create_model():
+    st.session_state.model_creator_open = False
+    send_message(
+        MessageType.CREATE_MODEL,
+        dict(name=st.session_state.model_name, action="create_model"),
+    )
 
 
 def load_model(name):
@@ -116,6 +136,7 @@ def load_model(name):
 
 def get_progress():
     send_message(MessageType.GET_PROGRESS)
+
 
 def update_params():
     values = {

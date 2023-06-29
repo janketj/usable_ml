@@ -8,6 +8,7 @@ from constants import (
     POOLING_TYPES,
     BLOCK_TYPES,
 )
+from functions import edit_block, remove_block, add_block, create_model
 
 
 def block_layers(block_type):
@@ -188,11 +189,17 @@ def block_form(index):
         edit_block = (
             st.session_state.edit_block if st.session_state.edit_block else None
         )
+        block_type = None
         if not edit_block:
             st.write(f"Add new Block after Block {index + 1}")
-        block_type = st.selectbox(
-            "Block type", BLOCK_TYPES, edit_block["block_type"], key="block_type"
-        )
+            block_type = st.selectbox(
+                "Block type", BLOCK_TYPES, 0, key="block_type"
+            )
+
+        else:
+            block_type = st.selectbox(
+                "Block type", BLOCK_TYPES, edit_block["block_type"], key="block_type"
+            )
 
         def submit_block():
             st.session_state.block_form_open = None
@@ -286,9 +293,6 @@ def block_adder(index):
 
 
 def model_creator():
-    def create_model():
-        st.session_state.model = {"name": st.session_state.model_name, "blocks": []}
-        st.session_state.model_creator_open = False
-
-    st.text_input("Model Name", "Model1", key="model_name")
-    st.button(f"Create model {st.session_state.model_name}", on_click=create_model)
+    new_model_name = st.text_input("Model Name", "", key="model_name")
+    if new_model_name:
+        st.button("Create model", on_click=create_model)

@@ -83,56 +83,6 @@ BLOCK_DEFAULT_PARAMS = {
 }
 
 PLACEHOLDER_MODEL = {
-    "name": "Default Model",
-    "blocks": [
-        {
-            "type": "ConvBlock",
-            "in_channels": 16,
-            "out_channels": 32,
-            "layers": {
-                "Conv": {
-                    "stride": 1,
-                    "padding": 2,
-                    "kernel_size": 4,
-                    "dilation": 0,
-                    "bias": True,
-                },
-                "Norm": {
-                    "num_features": 32,
-                    "out_features": 32,
-                    "momentum": 0.1,
-                },
-                "Activ": {
-                    "type": "ReLU",
-                },
-                "Drop": {"p": 0.05, "inplace": True},
-                "Pool": {
-                    "type": "max",
-                    "stride": 1,
-                    "padding": 2,
-                    "kernel_size": 4,
-                    "dilation": 0,
-                },
-            },
-        },
-        {
-            "type": "FCBlock",
-            "in_channels": 32,
-            "out_channels": 16,
-            "layers": {
-                "Linear": {
-                    "bias": True,
-                },
-                "Norm": {
-                    "num_features": 32,
-                    "out_features": 32,
-                    "momentum": 0.1,
-                },
-                "Activ": {
-                    "type": "ReLU",
-                },
-                "Drop": {"p": 0.05, "inplace": True},
-            },
-        },
-    ],
+    "name": "PLACEHOLDER",
+    "blocks": [],
 }
