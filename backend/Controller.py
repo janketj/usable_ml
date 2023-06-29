@@ -10,7 +10,7 @@ class Observer(ABC):
     """
 
     @abstractmethod
-    def update(self, messageType: MessageType, message: any, userId: any) -> None:
+    def update(self, messageType: MessageType, message: any, user_id: any, model_id: any) -> None:
         """
         Receive updates about subscribed message types.
         """
@@ -36,7 +36,7 @@ class Observable(ABC):
         pass
 
     @abstractmethod
-    def notify(self, messageType: MessageType, message: any, userId: any, emit_function: any) -> None:
+    def notify(self, messageType: MessageType, message: any, user_id: any, model_id: any emit_function: any) -> None:
         """
         Notify all observers about an event.
         """
@@ -68,9 +68,10 @@ class Controller(Observable):
         def catch_all(messageType, sid, data):
             ''' Put in queue'''
             print(f"BACKEND: Received {messageType} from {sid} with data {data}")
-            userId = data['userId']
+            user_id = data['user_id']
+            model_id = data['model_id']
             data['sid'] = sid
-            self.notify(messageType, data, userId, sio.emit)
+            self.notify(messageType, data, user_id, model_id, sio.emit)
 
         eventlet.wsgi.server(eventlet.listen(('', 6000)), app, log_output=False)
 
@@ -100,14 +101,14 @@ class Controller(Observable):
         currentObservers.remove(observer)
         self.subscribers[messageType] = currentObservers
 
-    def notify(self, messageType: MessageType, message: any, userId: any, emit_function: any) -> None:
+    def notify(self, messageType: MessageType, message: any, user_id: any, model_id: any, emit_function: any) -> None:
         """
         Notify all subscribed observers about the event.
         """
         currentObservers = self.subscribers.get(messageType, set())
 
         for observer in currentObservers:
-            res = observer.update(messageType, message, userId)
+            res = observer.update(messageType, message, user_id, model_id)
             print(f"Result: {res}")
             emit_function(messageType, res, room=message['sid'])
 
