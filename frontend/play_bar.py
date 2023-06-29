@@ -36,16 +36,11 @@ def play_bar():
             mui.Slider(
                         name="progress",
                         label="progrss",
-                        value=st.session_state.progress,
+                        value=st.session_state.progress["p"],
                         valueLabelDisplay="auto",
                         min=0,
-                        max=100,
-                        marks=[
-                            {
-                                "value": 25,
-                                "label": "changed XY",
-                            },
-                        ],
+                        max=st.session_state.epochs,
+                        marks=st.session_state.training_events,
                         sx={"width": "80%", "margin": "auto"},
                     )
             with mui.Button(onClick=skip_forward):

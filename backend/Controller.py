@@ -1,3 +1,5 @@
+import eventlet
+import socketio
 from MessageType import MessageType
 from multiprocessing import JoinableQueue, Event
 from abc import ABC, abstractmethod
@@ -34,12 +36,11 @@ class Observable(ABC):
         pass
 
     @abstractmethod
-    def notify(self, messageType: MessageType, message: any, userId: any) -> None:
+    def notify(self, messageType: MessageType, message: any, userId: any, emit_function: any) -> None:
         """
         Notify all observers about an event.
         """
         pass
-
 
 class Controller(Observable):
     def __init__(self, queue: JoinableQueue, interrupt: Event):
@@ -54,14 +55,24 @@ class Controller(Observable):
         messages to all observers that are subscribed to the message type.
         """
         print(f"Controller is live.")
-        while True:
-            if self.interrupt.is_set():
-                print("Stopped due to interrupt")
-                break
+        sio = socketio.Server(cors_allowed_origins='*', logger=False, engineio_logger=False)
+        app = socketio.WSGIApp(sio)
 
-            messageType, messageContent, userId = self.queue.get()
-            self.notify(messageType, messageContent, userId)
-            self.queue.task_done()
+        @sio.event
+        def connect(sid, environ):
+            '''Put user in room'''
+            print(f"Connected {sid}")
+            sio.enter_room(sid, sid)
+
+        @sio.on('*')
+        def catch_all(messageType, sid, data):
+            ''' Put in queue'''
+            print(f"BACKEND: Received {messageType} from {sid} with data {data}")
+            userId = data['userId']
+            data['sid'] = sid
+            self.notify(messageType, data, userId, sio.emit)
+
+        eventlet.wsgi.server(eventlet.listen(('', 6000)), app, log_output=False)
 
     def register(self, messageType: MessageType, observer: Observer) -> None:
         """
@@ -71,8 +82,9 @@ class Controller(Observable):
         The controller will notify the observer with the message whenever
         a message of type messageType comes in.
         """
-        currentObservers = self.subscribers.get(messageType, set())
-        currentObservers.add(observer)
+        currentObservers = self.subscribers.get(messageType, [])
+        currentObservers.append(observer)
+        print(f"Registered {currentObservers} for {messageType}")
         self.subscribers[messageType] = currentObservers
 
     def deregister(self, messageType: MessageType, observer: Observer) -> None:
@@ -83,15 +95,19 @@ class Controller(Observable):
         The controller will stop notifying the observer with messages
         of type messageType.
         """
-        currentObservers = self.subscribers.get(messageType, set())
+        print(f"Deregistering {observer} for {messageType}")
+        currentObservers = self.subscribers.get(messageType, [])
         currentObservers.remove(observer)
         self.subscribers[messageType] = currentObservers
 
-    def notify(self, messageType: MessageType, message: any, userId: any) -> None:
+    def notify(self, messageType: MessageType, message: any, userId: any, emit_function: any) -> None:
         """
         Notify all subscribed observers about the event.
         """
         currentObservers = self.subscribers.get(messageType, set())
 
         for observer in currentObservers:
-            observer.update(messageType, message, userId)
+            res = observer.update(messageType, message, userId)
+            print(f"Result: {res}")
+            emit_function(messageType, res, room=message['sid'])
+
