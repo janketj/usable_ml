@@ -20,35 +20,35 @@ if __name__ == "__main__":
 
     controller = Controller(taskQueue, interruptEvent)
 
-    userModels = {}
-    userTrainings = {}
+    user_models = {}
+    user_trainings = {}
 
-    modelObserver = Model(userModels)
-    trainingObserver = Training(userTrainings)
-    userObserver = User(userModels, userTrainings)
+    model_observer = Model(user_models)
+    training_observer = Training(user_trainings)
+    user_observer = User(user_models, user_trainings)
 
 
     """
     Register initial observers
     """
-    controller.register(MessageType.INIT_USER, userObserver)
-    controller.register(MessageType.INIT_USER, modelObserver)
-    controller.register(MessageType.INIT_USER, trainingObserver)
+    controller.register(MessageType.INIT_USER, user_observer)
+    controller.register(MessageType.INIT_USER, model_observer)
+    controller.register(MessageType.INIT_USER, training_observer)
 
     """
     Register model observers
     """
-    controller.register(MessageType.LOAD_MODEL, modelObserver)
-    controller.register(MessageType.SAVE_MODEL, modelObserver)
-    controller.register(MessageType.CREATE_MODEL, modelObserver)
+    controller.register(MessageType.LOAD_MODEL, model_observer)
+    controller.register(MessageType.SAVE_MODEL, model_observer)
+    controller.register(MessageType.CREATE_MODEL, model_observer)
 
     """
     Register training observers
     """
-    controller.register(MessageType.START_TRAINING, trainingObserver)
-    controller.register(MessageType.STOP_TRAINING, trainingObserver)
-    controller.register(MessageType.UPDATE_PARAMS, trainingObserver)
-    controller.register(MessageType.GET_PROGRESS, trainingObserver)
+    controller.register(MessageType.START_TRAINING, training_observer)
+    controller.register(MessageType.STOP_TRAINING, training_observer)
+    controller.register(MessageType.UPDATE_PARAMS, training_observer)
+    controller.register(MessageType.GET_PROGRESS, training_observer)
 
     workerProcess = Process(target=controller.start)
     workerProcess.start()

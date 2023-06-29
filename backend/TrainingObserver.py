@@ -6,93 +6,88 @@ from model_loader import load_model, save_model, create_model
 
 
 class Training(Observer):
-    def __init__(self, userTrainings):
-        self.userTrainings = userTrainings
-        self.training = None
+    def __init__(self, user_trainings):
+        self.user_trainings = user_trainings
 
-    def update(self, messageType: MessageType, message: any, userId: any) -> None:
+    def update(self, messageType: MessageType, message: any, user_id: any, model_id: any) -> None:
         """
         Model handling specific messages
         """
         switcher = {
-            MessageType.INIT_USER: self.init_user,
             MessageType.START_TRAINING: self.start_training,
             MessageType.STOP_TRAINING: self.stop_training,
             MessageType.UPDATE_PARAMS: self.update_parameters,
             MessageType.GET_PROGRESS: self.get_progress,
         }
         func = switcher.get(messageType, lambda: "Invalid message type")
-        return func(message, userId)
+        return func(message, user_id, model_id)
 
-    def init_user(self, message, userId):
-        """
-        Init a user by creating a default model and training
-        """
-        self.training = self.userTrainings[userId]
-        return "Training initialized"
-
-    def start_training(self, training, userId):
+    def start_training(self, training, user_id, model_id):
         """
         Start training
         """
-        self.training.start_training()
+        trainingInstance = self.user_trainings[user_id]
+        trainingInstance.start_training()
         return {
-            "message": f"training resumed/started",
-            "progress": self.training.current_epoch
-            + (self.training.current_batch / self.training.batch_size),
+            "message": "training resumed/started",
+            "progress": trainingInstance.current_epoch
+            + (trainingInstance.current_batch / trainingInstance.batch_size),
         }
 
-    def stop_training(self, training, userId):
+    def stop_training(self, training, user_id, model_id):
         """
         Stop training
         """
-        self.training.stop_training()
+        trainingInstance = self.user_trainings[user_id]
+        trainingInstance.stop_training()
         return {
-            "message": f"training paused",
-            "progress": self.training.current_epoch
-            + (self.training.current_batch / self.training.batch_size),
+            "message": "training paused",
+            "progress": trainingInstance.current_epoch
+            + (trainingInstance.current_batch / trainingInstance.batch_size),
         }
 
-    def get_progress(self, message, userId):
+    def get_progress(self, message, user_id, model_id):
         """
         get current progress
         """
+        trainingInstance = self.user_trainings[user_id]
         return {
-            "message": f"current progress",
-            "progress": self.training.current_epoch
-            + (self.training.current_batch / self.training.batch_size),
-            # "accuracy": self.training.accuracy,
-            "loss": self.training.loss,
+            "message": "current progress",
+            "progress": trainingInstance.current_epoch
+            + (trainingInstance.current_batch / trainingInstance.batch_size),
+            # "accuracy": trainingInstance.accuracy,
+            "loss": trainingInstance.loss,
         }
 
-    def update_parameters(self, message, userId):
+    def update_parameters(self, message, user_id, model_id):
         """
         Update the parameters that have changed
         """
         old_values = {}
         params = message["content"]
-        if params["loss_function"] != self.training.loss_function:
-            old_values["loss_function"] = self.training.loss_function
-            self.training.update_loss_function(params["loss_function"])
-        if params["use_cuda"] != self.training.use_cuda:
-            old_values["use_cuda"] = self.training.use_cuda
-            self.training.update_use_cuda(params["use_cuda"])
-        if params["optimizer"] != self.training.optimizer:
-            old_values["optimizer"] = self.training.optimizer
-            self.training.update_optimizer(params["optimizer"])
-        if params["epochs"] != self.training.epochs:
-            old_values["epochs"] = self.training.epochs
-            self.training.update_epochs(params["epochs"])
-        if params["batch_size"] != self.training.batch_size:
-            old_values["batch_size"] = self.training.batch_size
-            self.training.update_batch_size(params["batch_size"])
-        if params["learning_rate"] != self.training.learning_rate:
-            old_values["learning_rate"] = self.training.learning_rate
-            self.training.update_learning_rate(params["learning_rate"])
+        trainingInstance = self.user_trainings[user_id]
+        if params["loss_function"] != trainingInstance.loss_function:
+            old_values["loss_function"] = trainingInstance.loss_function
+            trainingInstance.update_loss_function(params["loss_function"])
+        if params["use_cuda"] != trainingInstance.use_cuda:
+            old_values["use_cuda"] = trainingInstance.use_cuda
+            trainingInstance.update_use_cuda(params["use_cuda"])
+        if params["optimizer"] != trainingInstance.optimizer:
+            old_values["optimizer"] = trainingInstance.optimizer
+            trainingInstance.update_optimizer(params["optimizer"])
+        if params["epochs"] != trainingInstance.epochs:
+            old_values["epochs"] = trainingInstance.epochs
+            trainingInstance.update_epochs(params["epochs"])
+        if params["batch_size"] != trainingInstance.batch_size:
+            old_values["batch_size"] = trainingInstance.batch_size
+            trainingInstance.update_batch_size(params["batch_size"])
+        if params["learning_rate"] != trainingInstance.learning_rate:
+            old_values["learning_rate"] = trainingInstance.learning_rate
+            trainingInstance.update_learning_rate(params["learning_rate"])
         return {
-            "message": f"parameters changed",
+            "message": "parameters changed",
             "new_values": params,
             "old_values": old_values,
-            "at": self.training.current_epoch
-            + (self.training.current_batch / self.training.batch_size),
+            "at": trainingInstance.current_epoch
+            + (trainingInstance.current_batch / trainingInstance.batch_size),
         }

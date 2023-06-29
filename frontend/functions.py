@@ -54,8 +54,9 @@ def send(msg, receiver: str = "tcp://localhost:5555"):
 
 def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
+    model_id = st.session_state.model_id
     print(f"Sending message {messageType} to {user_id}")
-    send(dict(messageType=messageType, content=message, userId=str(user_id)))
+    send(dict(messageType=messageType, content=message, user_id=str(user_id), model_id=str(model_id))
 
 
 def interrupt():
