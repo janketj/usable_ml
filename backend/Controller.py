@@ -70,8 +70,9 @@ class Controller(Observable):
             print(f"BACKEND: Received {messageType} from {sid} with data {data}")
             user_id = data['user_id']
             model_id = data['model_id']
+            content = data['content']
             data['sid'] = sid
-            self.notify(messageType, data, user_id, model_id, sio.emit)
+            self.notify(messageType, content, user_id, model_id, sio.emit)
 
         eventlet.wsgi.server(eventlet.listen(('', 6000)), app, log_output=False)
 
