@@ -4,7 +4,7 @@ from streamlit_elements import mui, html
 from constants import COLORS
 from model_editor import block_adder, model_creator
 from model_block import block
-
+from model_loader import model_loader
 
 def model_page():
     def start_create_model(event):
@@ -80,4 +80,4 @@ def model_page():
                     b_index += 1
             if st.session_state.model and len(st.session_state.model["blocks"]) < 1:
                 block_adder(0)
-        mui.Typography(st.session_state.existing_models[0]["name"])
+        model_loader()

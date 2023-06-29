@@ -21,6 +21,12 @@ if user_id is None:
     user_id = uuid.uuid4()
     st.experimental_set_query_params(user_id=user_id)
 
+if "model_id" not in st.session_state:
+    st.session_state.model_id = PLACEHOLDER_MODEL["model_id"]
+
+if "model_name" not in st.session_state:
+    st.session_state.model_name = PLACEHOLDER_MODEL["name"]
+
 if "user_id" not in st.session_state:
     st.session_state.user_id = user_id
     init_user()
@@ -62,9 +68,6 @@ if "block_form_open" not in st.session_state:
 
 if "model_creator_open" not in st.session_state:
     st.session_state.model_creator_open = False
-
-if "model_name" not in st.session_state:
-    st.session_state.model_name = PLACEHOLDER_MODEL["name"]
 
 if "model" not in st.session_state:
     st.session_state.model = PLACEHOLDER_MODEL

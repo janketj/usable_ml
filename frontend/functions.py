@@ -70,7 +70,7 @@ def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
     model_id = st.session_state.model_id
     print(f"Sending message {messageType} to {user_id}")
-    send(dict(messageType=messageType, content=message, user_id=str(user_id), model_id=str(model_id))
+    send(dict(messageType=messageType, content=message, user_id=str(user_id), model_id=str(model_id)))
 
 
 def interrupt():
@@ -112,27 +112,24 @@ def skip_backward():
 
 
 def add_block(params):
-    send_message(MessageType.ADD_BLOCK, dict(params, action="add_block"))
+    send_message(MessageType.ADD_BLOCK, params)
 
 
-def remove_block(name):
-    send_message(MessageType.REMOVE_BLOCK, dict(name, action="remove_block"))
+def remove_block(block_id):
+    send_message(MessageType.REMOVE_BLOCK, block_id )
 
 
 def edit_block(params):
-    send_message(MessageType.EDIT_BLOCK, dict(params, action="edit_block"))
+    send_message(MessageType.EDIT_BLOCK, params)
 
 
 def create_model():
     st.session_state.model_creator_open = False
-    send_message(
-        MessageType.CREATE_MODEL,
-        dict(name=st.session_state.model_name, action="create_model"),
-    )
+    send_message(MessageType.CREATE_MODEL,st.session_state.model_name)
 
 
 def load_model(name):
-    send_message(MessageType.LOAD_MODEL, dict(name, action="load_model"))
+    send_message(MessageType.LOAD_MODEL, name)
 
 
 def get_progress():
