@@ -59,12 +59,11 @@ class Training(Observer):
             "loss": trainingInstance.loss,
         }
 
-    def update_parameters(self, message, user_id, model_id):
+    def update_parameters(self, params, user_id, model_id):
         """
         Update the parameters that have changed
         """
         old_values = {}
-        params = message["content"]
         trainingInstance = self.user_trainings[user_id]
         if params["loss_function"] != trainingInstance.loss_function:
             old_values["loss_function"] = trainingInstance.loss_function
