@@ -47,11 +47,8 @@ if __name__ == "__main__":
     """
     controller.register(MessageType.START_TRAINING, trainingObserver)
     controller.register(MessageType.STOP_TRAINING, trainingObserver)
-    controller.register(MessageType.UPDATE_LEARNING_RATE, trainingObserver)
-    controller.register(MessageType.UPDATE_EPOCHS, trainingObserver)
-    controller.register(MessageType.UPDATE_OPTIMIZER, trainingObserver)
-    controller.register(MessageType.UPDATE_LOSS_FUNCTION, trainingObserver)
-    controller.register(MessageType.USE_CUDA, trainingObserver)
+    controller.register(MessageType.UPDATE_PARAMS, trainingObserver)
+    controller.register(MessageType.GET_PROGRESS, trainingObserver)
 
     workerProcess = Process(target=controller.start)
     workerProcess.start()

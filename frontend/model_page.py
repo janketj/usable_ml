@@ -6,7 +6,7 @@ from model_editor import block_adder, model_creator
 from model_block import block
 
 
-def model_dashboard():
+def model_page():
     def start_create_model(event):
         st.session_state.model_creator_open = True
 

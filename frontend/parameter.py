@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 from streamlit_elements import  mui, sync
 from constants import COLORS
-from functions import update_params
 
 
 def global_parameter(

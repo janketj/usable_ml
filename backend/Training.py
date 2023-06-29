@@ -1,29 +1,47 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
+from torch.optim import Optimizer, SGD, Adam
 
 class Training:
     def __init__(self, model):
         self.model = model
         self.optimizer = None
         self.loss_function = None
-        self.batch_size = None
-        self.epochs = None
+        self.batch_size = 256
+        self.epochs = 10
         self.use_cuda = False
         self.device = torch.device('cpu')
         self.is_training = False
+        self.learning_rate = 0.3
+        self.current_epoch = 0
+        self.current_batch = 0
+        self.loss = 100
 
     def update_optimizer(self, optimizer):
-        self.optimizer = optimizer
+        if optimizer == "SGD":
+             self.optimizer = SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.5)
+        elif optimizer == "Adam":
+             self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate)
 
     def update_loss_function(self, loss_function):
-        self.loss_function = loss_function
+        if loss_function == "cross_entropy":
+             self.loss_function = nn.CrossEntropyLoss
+        elif loss_function == "mse":
+             self.loss_function = nn.MSELoss
+        elif loss_function == "neg_log_lik":
+             self.loss_function = nn.NLLLoss
 
     def update_batch_size(self, batch_size):
         self.batch_size = batch_size
 
     def update_epochs(self, epochs):
         self.epochs = epochs
+
+    def update_learning_rate(self, learning_rate):
+        self.learning_rate = learning_rate
+        for g in self.optimizer.param_groups:
+            g['lr'] = learning_rate
+
 
     def update_use_cuda(self, use_cuda):
         self.use_cuda = use_cuda
@@ -43,6 +61,7 @@ class Training:
 
         for epoch in range(self.epochs):
             running_loss = 0.0
+            self.current_batch = 0
 
             for i, (inputs, labels) in enumerate(train_loader):
                 # Move inputs and labels to the selected device
@@ -66,14 +85,19 @@ class Training:
                 # Print the average loss every batch
                 if (i + 1) % self.batch_size == 0:
                     batch_loss = running_loss / (self.batch_size * (i + 1))
+                    self.loss = batch_loss
                     print(f"Epoch {epoch+1}/{self.epochs}, Batch {i+1}/{len(train_loader)}, Loss: {batch_loss}")
+                
+                self.current_batch += 1
 
             epoch_loss = running_loss / len(train_loader.dataset)
+            self.loss = epoch_loss
             print(f"Epoch {epoch+1}/{self.epochs}, Loss: {epoch_loss}")
 
             if not self.is_training:
                 print("Training stopped by user.")
                 break
+            self.current_epoch += 1
 
         self.is_training = False
 
