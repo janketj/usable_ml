@@ -39,20 +39,22 @@ class Model(Observer):
         """
         self.user_models[user_id][model_id] = create_model(name)
 
-    def add_layer(self, layer, user_id, model_id):
+    def add_block(self, block, user_id, model_id):
         """
-        Add a layer to a model
+        Create a block
         """
-        self.user_models[user_id][model_id].add_layer(layer)
-        return self.user_models[user_id][model_id].to_dict()
-
-    def remove_layer(self, layer, user_id, model_id):
-        """
-        Remove a layer from a model
-        """
-        self.user_models[user_id][model_id].removeLayer(layer)
-        return self.user_models[user_id][model_id].to_dict()
+        self.user_models[user_id][model_id].add_block(block)
 
 
+    def edit_block(self, block, user_id, model_id):
+        """
+        Edit a block
+        """
+        self.user_models[user_id][model_id].edit_block(block)
 
+    def remove_block(self, block_id, user_id, model_id):
+        """
+        Remove a block
+        """
+        self.user_models[user_id][model_id].remove_block(block_id)
 
