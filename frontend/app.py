@@ -69,6 +69,9 @@ if "model_name" not in st.session_state:
 if "model" not in st.session_state:
     st.session_state.model = PLACEHOLDER_MODEL
 
+if "existing_models" not in st.session_state:
+    st.session_state.existing_models = get_state("existing_models")
+
 if "tab" not in st.session_state:
     st.session_state.tab = "train"
 
@@ -77,6 +80,8 @@ if "training_events" not in st.session_state:
     dump_state("training_events", st.session_state.training_events)
 
 st.session_state.training_events = get_state("training_events")
+st.session_state.model = get_state("model")
+st.session_state.existing_models = get_state("existing_models")
 
 get_progress()
 
