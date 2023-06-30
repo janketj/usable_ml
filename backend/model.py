@@ -5,10 +5,11 @@ import torch.nn.functional as F
 
 class Model(nn.Module):
 
-    def __init__(self, name):
+    def __init__(self, name, model_id):
         super().__init__()
 
         self.name = name
+        self.model_id = model_id
 
         self.globals_dict = globals()
         self.globals_dict['nn'] = nn

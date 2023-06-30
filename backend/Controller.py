@@ -70,9 +70,8 @@ class Controller(Observable):
             print(f"BACKEND: Received {messageType} from {sid} with data {data}")
             user_id = data['user_id']
             model_id = data['model_id']
-            content = data['content']
-            data['sid'] = sid
-            self.notify(messageType, content, user_id, model_id, sio.emit)
+            content = data["content"]
+            self.notify(messageType, content, user_id, model_id,sid, sio.emit)
 
         eventlet.wsgi.server(eventlet.listen(('', 6000)), app, log_output=False)
 
@@ -102,7 +101,7 @@ class Controller(Observable):
         currentObservers.remove(observer)
         self.subscribers[messageType] = currentObservers
 
-    def notify(self, messageType: MessageType, message: any, user_id: any, model_id: any, emit_function: any) -> None:
+    def notify(self, messageType: MessageType, message: any, user_id: any, model_id: any,sid: any, emit_function: any) -> None:
         """
         Notify all subscribed observers about the event.
         """
@@ -111,5 +110,5 @@ class Controller(Observable):
         for observer in currentObservers:
             res = observer.update(messageType, message, user_id, model_id)
             print(f"Result: {res}")
-            emit_function(messageType, res, room=message['sid'])
+            emit_function(messageType, res, room=sid)
 
