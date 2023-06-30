@@ -3,6 +3,7 @@ from streamlit_elements import mui, nivo
 from functions import update_params
 from parameter import global_parameter
 from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS
+from nivo_timechart import nivo_timechart
 
 
 def train_page():
@@ -37,6 +38,7 @@ def train_page():
                     "learning_rate",
                     type="slider",
                     sliderRange=[0.01, 1],
+                    step=0.01,
                 )
                 global_parameter("Epochs", "epochs", type="slider", sliderRange=[1, 30])
                 global_parameter(
@@ -62,19 +64,18 @@ def train_page():
                     type="select",
                 )
                 with mui.Button(
-                    onClick=update_params, sx={"width": "50%", "margin": "auto"}
+                    onClick=update_params,
+                    variant="outlined",
+                    sx={"width": 300, "margin": "auto"},
                 ):
-                    mui.Typography("Update Parameters", sx={"width": "80%"})
+                    mui.Typography(
+                        "Update Parameters", sx={"width": "80%", "pt": "4px"}
+                    )
                     mui.icon.Send()
         with mui.Stack(
             sx={"width": "60%", "maxHeight": 500, "height": 500, "margin": "16px"}
         ):
-            nivo.Line(
-                height=300,
-                data=PLACEHOLDER_ACCURACY,
-                margin={"bottom": 50},
-            )
-            nivo.Line(
-                height=200,
-                data=PLACEHOLDER_LOSS,
-            )
+            acc = st.session_state.vis_data["accuracy"]
+            loss = st.session_state.vis_data["loss"]
+            nivo_timechart(acc, "Accuracy", 300, margin=50)
+            nivo_timechart(loss, "Loss", 200, margin=50)

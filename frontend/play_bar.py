@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from streamlit_elements import elements, mui, sync
+from streamlit_elements import elements, mui, event
 from constants import COLORS
 from functions import (
     start_training,
@@ -8,11 +8,18 @@ from functions import (
     reset_training,
     skip_forward,
     skip_backward,
+    get_progress,
 )
 
 
 def play_bar():
     with elements("play_bar"):
+        if (
+            st.session_state.progress <= st.session_state.epochs
+            and st.session_state.is_training
+        ):
+            event.Interval(3, get_progress)
+
         with mui.Box(
             sx={
                 "bgcolor": "background.paper",
@@ -34,15 +41,15 @@ def play_bar():
             with mui.Button(onClick=skip_backward):
                 mui.icon.FirstPage()
             mui.Slider(
-                        name="progress",
-                        label="progrss",
-                        value=st.session_state.progress["p"],
-                        valueLabelDisplay="auto",
-                        min=0,
-                        max=st.session_state.epochs,
-                        marks=st.session_state.training_events,
-                        sx={"width": "80%", "margin": "auto"},
-                    )
+                name="progress",
+                label="progress",
+                value=st.session_state.progress,
+                valueLabelDisplay="auto",
+                min=0,
+                max=st.session_state.epochs,
+                marks=st.session_state.training_events,
+                sx={"width": "80%", "margin": "auto"},
+            )
             with mui.Button(onClick=skip_forward):
                 mui.icon.LastPage()
             with mui.Button(onClick=skip_forward):

@@ -45,9 +45,10 @@ if "tab" not in st.session_state:
     st.session_state.tab = "train"
 
 if "progress" not in st.session_state:
-    initial_progress = {"p": 0, "loss": 100}
-    st.session_state.progress = initial_progress
-    dump_state("progress", initial_progress)
+    st.session_state.progress = 0
+    st.session_state.vis_data = {"accuracy": [], "loss": []}
+    dump_state("progress", 0)
+    dump_state("vis_data", st.session_state.vis_data)
 
 if "learning_rate" not in st.session_state:
     st.session_state.learning_rate = 0.3
@@ -88,8 +89,17 @@ if "existing_models" not in st.session_state:
 if "tab" not in st.session_state:
     st.session_state.tab = "train"
 
+if  "predicted_class" not in st.session_state:
+    st.session_state.predicted_class = 0
+
 if "training_events" not in st.session_state:
-    st.session_state.training_events = []
+    st.session_state.training_events = [
+        """ {
+            "value": i,
+            "label": i,
+        }
+        for i in range(st.session_state.epochs + 1) """
+    ]
     dump_state("training_events", st.session_state.training_events)
 
 st.session_state.training_events = get_state("training_events")
