@@ -10,6 +10,7 @@ from train_page import train_page
 from test_page import test_page
 from constants import PLACEHOLDER_MODEL
 from session_state_dumper import get_state, dump_state
+from menu_bar import menu_bar
 
 apply_style()
 
@@ -23,6 +24,12 @@ if user_id is None:
 
 if "model_id" not in st.session_state:
     st.session_state.model_id = PLACEHOLDER_MODEL["model_id"]
+    st.session_state.loaded_model = {
+        "props": {
+            "value": PLACEHOLDER_MODEL["model_id"],
+            "children": PLACEHOLDER_MODEL["name"],
+        }
+    }
 
 if "model_name" not in st.session_state:
     st.session_state.model_name = PLACEHOLDER_MODEL["name"]
@@ -33,6 +40,9 @@ if "user_id" not in st.session_state:
 
 if "is_training" not in st.session_state:
     st.session_state.is_training = 0
+
+if "tab" not in st.session_state:
+    st.session_state.tab = "train"
 
 if "progress" not in st.session_state:
     initial_progress = {"p": 0, "loss": 100}
@@ -86,22 +96,21 @@ st.session_state.training_events = get_state("training_events")
 st.session_state.model = get_state("model")
 st.session_state.existing_models = get_state("existing_models")
 
-get_progress()
 
-st.session_state.progress = get_state("progress")
+# train_tab, model_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])
 
-train_tab, model_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])
+menu_bar()
 
-with train_tab:
+if st.session_state.tab == "train":
     with elements("train_tab"):
         train_page()
-with model_tab:
+
+if st.session_state.tab == "model":
     with elements("model_dashboard"):
         model_page()
 
-with test_tab:
-    with elements("test_tab"):
-        test_page()
+if st.session_state.tab == "eval":
+    test_page()
 
 
 play_bar()

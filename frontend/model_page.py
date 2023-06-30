@@ -4,7 +4,7 @@ from streamlit_elements import mui, html
 from constants import COLORS
 from model_editor import block_adder, model_creator
 from model_block import block
-from model_loader import model_loader
+
 
 def model_page():
     def start_create_model(event):
@@ -16,6 +16,8 @@ def model_page():
             "borderRadius": 2,
             "p": 2,
             "boxShadow": 1,
+            "minHeight": 500,
+            "height": 500,
             "background": COLORS["bg-paper"],
         },
     ):
@@ -27,7 +29,7 @@ def model_page():
                     "boxShadow": 1,
                     "borderRadius": 2,
                     "p": 2,
-                    "background": COLORS["bg-box"],
+                    "background": COLORS["bg-light"],
                     "alignItems": "center",
                     "display": "flex",
                     "justifyContent": "space-between",
@@ -39,12 +41,12 @@ def model_page():
                 )
                 with mui.Button(
                     id="create_new_model",
-                    onClick=start_create_model,
-                    sx={"p": "16px", "color": COLORS["red"]},
+                    variant="outlined",
+                    onClick=start_create_model,sx={"width": 300},
                 ):
                     mui.Typography(
                         "Create New Model",
-                        sx={"p": "4px", "color": COLORS["red"]},
+                        sx={"width": "80%", "pt": "4px", "margin": "auto"},
                     )
                     mui.icon.Add()
 
@@ -57,8 +59,7 @@ def model_page():
             spacing="16px",
             sx={
                 "width": "100%",
-                "minHeight": 450,
-                "height": "100%",
+                "height": 380,
                 "borderRadius": 2,
                 "p": 2,
                 "alignItems": "center",
@@ -80,4 +81,3 @@ def model_page():
                     b_index += 1
             if st.session_state.model and len(st.session_state.model["blocks"]) < 1:
                 block_adder(0)
-        model_loader()

@@ -5,9 +5,18 @@ def apply_style():
         """
     <style>
         .reportview-container .main .block-container {
+            max-width: 100vw !important;
+            width: 100vw;
+            height: 100vh;
+            max-height: 100vh !important;
+            padding: 0;
+        }
+
+        .block-container .css-1y4p8pa .egzxvld4 {
             max-width: 100% !important;
-            width: 100%;
-            padding-top: 0;
+            width: 100vw;
+            height: 100vh;
+            padding: 0px;
         }
         .css-1y4p8pa {
             max-width: 100% !important;
@@ -21,6 +30,10 @@ def apply_style():
         }
 
         #tabs-bui2-tabpanel-0 {
+        }
+
+        .css-1ftyaf0 {
+        color: white;
         }
     </style>
     """,
