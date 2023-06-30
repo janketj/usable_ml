@@ -13,6 +13,9 @@ class MessageType(str, Enum):
     SAVE_MODEL = "save_model"
     UPDATE_PARAMS = "update_params"
     GET_PROGRESS = "get_progress"
+    RESET_TRAINING = "reset_training"
+    EVALUATE_DIGIT= "evaluate_digit"
+    EVALUATE_TESTSET = "evaluate_testset",
 
     def __str__(self) -> str:
         return self.value
