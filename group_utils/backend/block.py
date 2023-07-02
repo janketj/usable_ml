@@ -4,18 +4,23 @@ import math
 
 
 class Block(nn.Module):
+    id_counter = 0
 
-
-    def __init__(self, name, next):
+    def __init__(self, name, pervious):
         super().__init__()
+
+        self.id = Block.id_counter
+        Block.id_counter += 1
 
         self.name = name 
 
         self.next = None
-        self.pervious = None
 
-        if next is not None:
-            self.assigeNext(next)
+        if pervious is not None:
+            self.assignPervious(pervious)
+        else:
+            self.pervious = None
+
 
 
         self.norm = None 
@@ -23,35 +28,84 @@ class Block(nn.Module):
         self.drop = None
 
         self.normParamas = None
-        self.activType = None
+        self.activParamas= None
         self.dropParamas = None
         
 
         self.globals_dict = globals()
         self.globals_dict['nn'] = nn
         self.globals_dict['F'] = F
-        self.globals_dict['self'] = self 
+        self.globals_dict['self'] = self
 
-    def assigeNext(self, next):
+
+
+
+    def changeName(self, name):
+        self.name = name
+        
+
+    def __str__(self):
+        return str(self.getInfo())
+    
+
+
+    def getLayers(self):
+
+        return None
+    
+
+    def getInfo(self): 
+
+        dict = {"type" : self.type,
+                "name" : self.name,
+                "pervious" : self.getPreviousId(), 
+                "layers" : self.getLayers()
+                }
+        
+
+        return {"id" : self.getId(), "info" : dict}
+    
+
+
+
+
+    def assignPervious(self, pervious):
+        
+        self.pervious = pervious
+        self.pervious.assignNext(self)
+
+
+
+    def getPreviousId(self):
+        if self.pervious is not None:
+            return self.pervious.getId()
+        else:
+            return None
+
+        
+        
+
+    def assignNext(self, next):
         self.next = next
-        print(self.next)
-        self.next.pervious = self
         
 
-    def deleteNext(self):
-        self.next.pervious = None
-        self.next = None
+        
+    
+
+    def getId(self):
+
+        return self.id
         
 
 
 
-    def createActiv(self, type):
+    def createActiv(self, params):
 
         """
         Creates a activation layer.
 
         Args:
-            type (str): The type of activation layer ["ReLU", "LeakyReLU", "Sigmoid", "Tanh", "Softmax"].
+            params (str): The type of activation layer ["ReLU", "LeakyReLU", "Sigmoid", "Tanh", "Softmax"].
 
 
         Returns:
@@ -60,8 +114,9 @@ class Block(nn.Module):
 
 
         if self.activ is None:
+            type = params["type"]
             exec(f"self.activ  = nn.{type}()", self.globals_dict)
-            self.activType = type
+            self.activParamas = {"type" : type}
             return True
         else:
             print("The block already has a activation layer.")
@@ -123,7 +178,7 @@ class Block(nn.Module):
         # p (float): The probability of an element to be zeroed. It must be a value between 0 and 1.
         # inplace (bool): If set to True, the operation is performed in-place, i.e., it modifies the input tensor.
 
-        if self.drop is None and self.next is None:
+        if self.drop is None:
             self.drop  = nn.Dropout(**params)
             self.dropParamas = params
             return True
@@ -144,10 +199,11 @@ class Block(nn.Module):
             bool:  True if the layer is removed, False otherwise
         """
         # conv,  activ,  pool, linear, drop, norm
-        layerType = getattr(self, layerType)
 
-        if  layerType is None:
-            setattr(self, layerType, None)
+        if  layerType is not None:
+
+            setattr(self, layerType , None)
+
             return True
         
         else:
@@ -175,7 +231,8 @@ class Block(nn.Module):
             # createConv, createPool, createLinear, createNorm, createDrop
             # conv,  pool, linear, norm, drop
             layerClass = "create" + layerType.capitalize()
-            exec(f"self.{layerType}  = self.{layerClass}({newParams}*)", self.globals_dict)
+
+            exec(f"self.{layerClass}({newParams})")
             return True
         
     def freezeLayer(self, layerType):
@@ -237,8 +294,10 @@ class Block(nn.Module):
 class ConvBlock(Block):
 
     
-    def __init__(self, name, next):
-        super().__init__(name,  next)
+    def __init__(self, name, pervious):
+        super().__init__(name,  pervious)
+
+        self.type = "ConvBlock"
         
         self.conv = None
         self.pool = None 
@@ -252,6 +311,17 @@ class ConvBlock(Block):
         #dummy params
         params = {"in_channels" : None, "out_channels" : 3, "kernel_size" : (3, 3)} 
         self.createConv(params)
+
+
+    def getLayers(self):
+        layers = {
+                    "conv" : self.convParamas,
+                    "norm" : self.normParamas,
+                    "activ" : self.activParamas,
+                    "drop" : self.dropParamas,
+                    "pool" : self.poolParamas
+                }
+        return layers
 
          
 
@@ -291,20 +361,23 @@ class ConvBlock(Block):
         # groups: This controls the connections between input and output channels. By default, it is set to 1, which means each input channel is connected to each output channel. For grouped convolution, you can set the groups parameter to a specific value.
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
+        if self.pervious is not None:
+                params["in_channels"] = self.pervious.outputDim[0]
+        else:
+                params["in_channels"] = 1
+
+
         if self.conv is None:
 
-            if self.pervious is not None:
-                params["in_channels"] = self.pervious.outputDim[0]
-            else:
-                params["in_channels"] = 1
+
 
             self.conv = nn.Conv2d(**params)
             self.convParamas = params
             self.mutateOutputDim()
             return True
         else:
-            print("The block already has a convolutional layer.")
-            return False
+            
+            return self.changeLayerParameters("conv", params)
         
 
 
@@ -474,8 +547,10 @@ class ConvBlock(Block):
 
 class FCBlock(Block):
 
-    def __init__(self, name, next):
-        super().__init__(name, next) 
+    def __init__(self, name, pervious):
+        super().__init__(name, pervious) 
+
+        self.type = "FCBlock"
 
         self.linear = None 
 
@@ -486,6 +561,16 @@ class FCBlock(Block):
         #dummy params
         params = {"in_features" : 10, "out_features" : 10}
         self.createLinear(params)
+
+
+    def getLayers(self):
+        layers = {
+                    "linear" : self.linearParams,
+                    "norm" : self.normParamas,
+                    "activ" : self.activParamas,
+                    "drop" : self.dropParamas,
+                           }
+        return layers
 
 
 
@@ -512,13 +597,14 @@ class FCBlock(Block):
         # out_features: Data type: int. Specifies the size of each output sample. It represents the number of output features.
         # bias: Data type: bool, optional. Specifies whether to include a bias term in the linear transformation. Default is True. If set to False, the layer will not learn an additive bias.
         
+        if self.pervious is not None:
+            if isinstance(self.pervious , ConvBlock):
+                params["in_features"]  = self.pervious.outputDim[0] * self.pervious.outputDim[1] * self.pervious.outputDim[2]
+            elif isinstance(self.pervious , FCBlock):
+                params["in_features"]  = self.pervious.outputDim
 
         if self.linear is None:
-                if self.pervious is not None:
-                    if isinstance(self.pervious , ConvBlock):
-                        params["in_features"]  = self.pervious.outputDim[0] * self.pervious.outputDim[1] * self.pervious.outputDim[2]
-                    elif isinstance(self.pervious , FCBlock):
-                       params["in_features"]  = self.pervious.outputDim
+
 
                 if self.next is  None:
                     params["out_features"]  = 10
@@ -529,12 +615,12 @@ class FCBlock(Block):
                 self.mutateOutputDim()
                 return True
         else:
-            print("The block already has a fully conected linear layer.")
-            return False
+            return self.changeLayerParameters("linear", params)
+
         
-    def assigeNext(self, next):
+    def assignNext(self, next):
         if isinstance(next , FCBlock):
-            return super().assigeNext(next)
+            return super().assignNext(next)
         else:
             print("After a fully connected block, you are not allowed to have a Conv layer")
 
