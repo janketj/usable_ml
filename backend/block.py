@@ -510,12 +510,12 @@ class ConvBlock(Block):
 
         # Pooling layer parameters
         if self.pool is not None:
-            pool_size = self.pool.kernel_size
-            pool_stride = self.pool.stride
+            Pool_size = self.pool.kernel_size
+            Pool_stride = self.pool.stride
 
             # Calculate output size for the pooling layer
-            outWidth = math.floor((outWidth - pool_size) / pool_stride) + 1
-            outHeight = math.floor((outHeight - pool_size) / pool_stride) + 1
+            outWidth = math.floor((outWidth - Pool_size) / Pool_stride) + 1
+            outHeight = math.floor((outHeight - Pool_size) / Pool_stride) + 1
 
         self.outputDim = (outWidth, outHeight, outChannels)
 

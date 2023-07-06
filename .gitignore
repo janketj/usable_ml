@@ -1,2 +1,5 @@
 **/__pycache__
 **/MNIST
+models/
+.DS_Store
+*.json
