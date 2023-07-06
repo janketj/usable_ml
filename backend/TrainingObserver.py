@@ -22,9 +22,13 @@ class Training(Observer):
             MessageType.RESET_TRAINING: self.reset_training,
             MessageType.UPDATE_PARAMS: self.update_parameters,
             MessageType.GET_PROGRESS: self.get_progress,
+            MessageType.INIT_USER: self.init_user,
         }
         func = switcher.get(messageType, lambda: "Invalid message type")
         return func(message, user_id, model_id)
+
+    def init_user(self, message, user_id, model_id):
+        self.user_trainings[user_id] = Training(self.user_models[user_id]['default'])
 
     def start_training(self, training, user_id, model_id):
         """
