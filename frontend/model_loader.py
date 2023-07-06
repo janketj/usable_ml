@@ -1,21 +1,37 @@
 import streamlit as st
 import numpy as np
-from streamlit_elements import mui, html
-from constants import COLORS
+from streamlit_elements import mui, sync
+from functions import load_model
 
 
 def model_loader():
-    with mui.Stack(
-        direction="column",
-        sx={
-            "width": 400,
-            "height": 400,
-            "bgcolor": COLORS["bg-light"],
-            "boxShadow": 2,
-            "borderRadius": 2,
-            "transition": "height 1s, width 1s",
-            "p": 2,
-        },
+    with mui.FormControl(
+        sx={"width": 700, "display": "flex", "justifyContent": "flex-start"},
     ):
-        for model_info in st.session_state.existing_models:
-            mui.Typography(model_info["name"])
+        mui.InputLabel("Model", id="loaded_model_label")
+        with mui.Select(
+            name="loaded_model",
+            labelId="loaded_model_label",
+            label="Model",
+            size="small",
+            disablePortal=True,
+            value=st.session_state.loaded_model["props"]["value"],
+            onChange=sync(None, "loaded_model"),
+            sx={"width": 200, "color": "#fff"},
+            inputProps={
+                "name": "loaded_model",
+                "id": "loaded_model",
+            },
+        ):
+            for model_info in st.session_state.existing_models:
+                mui.MenuItem(model_info["name"], value=model_info["id"])
+        if st.session_state.loaded_model["props"]["value"] != st.session_state.model_id:
+            with mui.Button(
+                onClick=load_model,
+                variant="outlined",
+                sx={"width": 170},
+            ):
+                mui.Typography(
+                    "Load Model", sx={"width": "80%", "pt": "4px", "margin": "auto"}
+                )
+                mui.icon.Upload()

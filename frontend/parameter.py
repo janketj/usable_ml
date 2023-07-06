@@ -5,7 +5,7 @@ from constants import COLORS
 
 
 def global_parameter(
-    name, key, defaultValue=0, sliderRange=[0, 100], options=[], type="slider"
+    name, key, defaultValue=0, sliderRange=[0, 100], options=[], type="slider", step=1
 ):
     if key not in st.session_state:
         st.session_state[key] = defaultValue
@@ -38,25 +38,13 @@ def global_parameter(
                             "label": sliderRange[1],
                         },
                     ],
+                    step=step,
                     sx={"width": "80%"},
                 )
-                mui.TextField(
-                    value=st.session_state[key],
-                    size="small",
-                    onChange=sync(None, key),
-                    inputProps={
-                        "step": 10,
-                        "min": sliderRange[0],
-                        "max": sliderRange[1],
-                        "type": "number",
-                    },
-                    sx={
-                        "width": "15%",
-                    },
-                )
+                mui.Typography(st.session_state[key], sx={"width": "15%", "pt": "6px"})
         if type == "select":
             with mui.Box(sx={"display": "flex", "justifyContent": "space-between"}):
-                mui.Typography(name, sx={"width": "20%"})
+                mui.Typography(name, sx={"width": "20%", "pt": "6px"})
                 with mui.Select(
                     name=key,
                     label=name,

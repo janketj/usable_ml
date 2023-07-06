@@ -72,6 +72,6 @@ def load_models():
             model_name = os.path.splitext(filename)[0]
             model = load_model(model_name)
             if model is not None:
-                models.append(dict(name=model.name, id=model.id))
+                models.append(dict(name=model.name, id=model.model_id))
     return models
 

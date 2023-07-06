@@ -1,6 +1,7 @@
 from Controller import Observer
 from Training import Training
 from MessageType import MessageType
+from random import random
 
 from model_loader import load_model, save_model, create_model
 
@@ -9,13 +10,16 @@ class Training(Observer):
     def __init__(self, user_trainings):
         self.user_trainings = user_trainings
 
-    def update(self, messageType: MessageType, message: any, user_id: any, model_id: any) -> None:
+    def update(
+        self, messageType: MessageType, message: any, user_id: any, model_id: any
+    ) -> None:
         """
         Model handling specific messages
         """
         switcher = {
             MessageType.START_TRAINING: self.start_training,
             MessageType.STOP_TRAINING: self.stop_training,
+            MessageType.RESET_TRAINING: self.reset_training,
             MessageType.UPDATE_PARAMS: self.update_parameters,
             MessageType.GET_PROGRESS: self.get_progress,
         }
@@ -46,17 +50,30 @@ class Training(Observer):
             + (trainingInstance.current_batch / trainingInstance.batch_size),
         }
 
+    def reset_training(self, training, user_id, model_id):
+        """
+        Reset training
+        """
+        # TODO: reset training logic
+        return True
+
     def get_progress(self, message, user_id, model_id):
         """
         get current progress
         """
+        """ 
         trainingInstance = self.user_trainings[user_id]
         return {
             "message": "current progress",
-            "progress": trainingInstance.current_epoch
-            + (trainingInstance.current_batch / trainingInstance.batch_size),
-            # "accuracy": trainingInstance.accuracy,
+            "progress": trainingInstance.current_epoch  + (trainingInstance.current_batch / trainingInstance.batch_size) random() * trainingInstance.epochs,
+            "accuracy": trainingInstance.accuracy,
             "loss": trainingInstance.loss,
+        } """
+        return {
+            "message": "current progress",
+            "progress": message + 0.1,
+            "accuracy": message + random(),
+            "loss": message - 2 * random(),
         }
 
     def update_parameters(self, params, user_id, model_id):

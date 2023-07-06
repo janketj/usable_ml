@@ -16,15 +16,10 @@ def catch_all(messageType, data=None):
     if messageType == "get_progress":
         update_progress(data)
     if messageType == "create_model":
-        update_existing_models(data["id"], data["name"])
+        update_existing_models(data["model_id"], data["name"])
         update_model(data)
 
 
-# Hier ist das Problem: der session state scheint nicht initialisiert zu sein
-# weil man in einem anderen Thread ist
-# Kriege folgenden Fehler:
-# Thread 'Thread-12 (_handle_eio_message)': missing ScriptRunContext
-# und dann ... KeyError: 'st.session_state has no key "batch_size"
 def add_training_event(data):
     training_events = get_state("training_events")
 
@@ -48,11 +43,11 @@ def update_model(data):
 
 
 def update_progress(data):
-    curr_status = {
-        "p": data["progress"],
-        "loss": data["loss"],
-    }
-    dump_state("progress", curr_status)
+    vis_data = get_state("vis_data")
+    vis_data["accuracy"] += [{"x": data["progress"], "y": data["accuracy"]}]
+    vis_data["loss"] += [{"x": data["progress"], "y": data["loss"]}]
+    dump_state("progress", data["progress"])
+    dump_state("vis_data", vis_data)
 
 
 def init_user():
@@ -70,7 +65,14 @@ def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
     model_id = st.session_state.model_id
     print(f"Sending message {messageType} to {user_id}")
-    send(dict(messageType=messageType, content=message, user_id=str(user_id), model_id=str(model_id)))
+    send(
+        dict(
+            messageType=messageType,
+            content=message,
+            user_id=str(user_id),
+            model_id=str(model_id),
+        )
+    )
 
 
 def interrupt():
@@ -94,7 +96,10 @@ def pause_training():
 def reset_training():
     st.session_state.is_training = 0
     st.session_state.progress = 0
-    send_message("reset_training")
+    st.session_state.vis_data = {"accuracy": [], "loss": []}
+    dump_state("progress", st.session_state.progress)
+    dump_state("vis_data", st.session_state.vis_data)
+    send_message(MessageType.RESET_TRAINING)
 
 
 def skip_forward():
@@ -116,7 +121,7 @@ def add_block(params):
 
 
 def remove_block(block_id):
-    send_message(MessageType.REMOVE_BLOCK, block_id )
+    send_message(MessageType.REMOVE_BLOCK, block_id)
 
 
 def edit_block(params):
@@ -125,15 +130,19 @@ def edit_block(params):
 
 def create_model():
     st.session_state.model_creator_open = False
-    send_message(MessageType.CREATE_MODEL,st.session_state.model_name)
+    send_message(MessageType.CREATE_MODEL, st.session_state.model_name)
 
 
-def load_model(name):
-    send_message(MessageType.LOAD_MODEL, name)
+def load_model():
+    model_id = st.session_state.loaded_model
+    st.session_state.tab = "model"
+    send_message(MessageType.LOAD_MODEL, model_id)
 
 
 def get_progress():
-    send_message(MessageType.GET_PROGRESS)
+    st.session_state.progress = get_state("progress")
+    st.session_state.vis_data = get_state("vis_data")
+    send_message(MessageType.GET_PROGRESS, st.session_state.progress)
 
 
 def update_params():
