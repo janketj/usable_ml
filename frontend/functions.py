@@ -15,6 +15,8 @@ def catch_all(messageType, data=None):
         add_training_event(data)
     if messageType == "get_progress":
         update_progress(data)
+    if messageType == "init_user":
+        dump_state("existing_models", data)
     if messageType == "create_model":
         update_existing_models(data["model_id"], data["name"])
         update_model(data)

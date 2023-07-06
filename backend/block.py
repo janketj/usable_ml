@@ -6,7 +6,7 @@ import math
 class Block(nn.Module):
     id_counter = 0
 
-    def __init__(self, name, pervious):
+    def __init__(self, name, previous):
         super().__init__()
 
         self.id = Block.id_counter
@@ -16,10 +16,10 @@ class Block(nn.Module):
 
         self.next = None
 
-        if pervious is not None:
-            self.assignPervious(pervious)
+        if previous is not None:
+            self.assignPrevious(previous)
         else:
-            self.pervious = None
+            self.previous = None
 
 
 
@@ -58,7 +58,7 @@ class Block(nn.Module):
 
         dict = {"type" : self.type,
                 "name" : self.name,
-                "pervious" : self.getPreviousId(), 
+                "previous" : self.getPreviousId(), 
                 "layers" : self.getLayers()
                 }
         
@@ -69,16 +69,16 @@ class Block(nn.Module):
 
 
 
-    def assignPervious(self, pervious):
+    def assignPrevious(self, previous):
         
-        self.pervious = pervious
-        self.pervious.assignNext(self)
+        self.previous = previous
+        self.previous.assignNext(self)
 
 
 
     def getPreviousId(self):
-        if self.pervious is not None:
-            return self.pervious.getId()
+        if self.previous is not None:
+            return self.previous.getId()
         else:
             return None
 
@@ -294,8 +294,8 @@ class Block(nn.Module):
 class ConvBlock(Block):
 
     
-    def __init__(self, name, pervious):
-        super().__init__(name,  pervious)
+    def __init__(self, name, previous):
+        super().__init__(name,  previous)
 
         self.type = "ConvBlock"
         
@@ -361,8 +361,8 @@ class ConvBlock(Block):
         # groups: This controls the connections between input and output channels. By default, it is set to 1, which means each input channel is connected to each output channel. For grouped convolution, you can set the groups parameter to a specific value.
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
-        if self.pervious is not None:
-                params["in_channels"] = self.pervious.outputDim[0]
+        if self.previous is not None:
+                params["in_channels"] = self.previous.outputDim[0]
         else:
                 params["in_channels"] = 1
 
@@ -489,8 +489,8 @@ class ConvBlock(Block):
     def mutateOutputDim(self):
 
         # Input dimensions
-        if self.pervious is not None:
-            inputWidth, inputHeight, _  = self.pervious.outputDim
+        if self.previous is not None:
+            inputWidth, inputHeight, _  = self.previous.outputDim
         else:
             inputWidth, inputHeight, _  = (28, 28, 1)
 
@@ -517,7 +517,7 @@ class ConvBlock(Block):
             outWidth = math.floor((outWidth - Pool_size) / Pool_stride) + 1
             outHeight = math.floor((outHeight - Pool_size) / Pool_stride) + 1
 
-        self.outputDim = (outWidth, outHeight, outChannels)
+        self.outputDim = outChannels#(outWidth, outHeight, )
 
 
 
@@ -547,8 +547,8 @@ class ConvBlock(Block):
 
 class FCBlock(Block):
 
-    def __init__(self, name, pervious):
-        super().__init__(name, pervious) 
+    def __init__(self, name, previous):
+        super().__init__(name, previous) 
 
         self.type = "FCBlock"
 
@@ -597,11 +597,11 @@ class FCBlock(Block):
         # out_features: Data type: int. Specifies the size of each output sample. It represents the number of output features.
         # bias: Data type: bool, optional. Specifies whether to include a bias term in the linear transformation. Default is True. If set to False, the layer will not learn an additive bias.
         
-        if self.pervious is not None:
-            if isinstance(self.pervious , ConvBlock):
-                params["in_features"]  = self.pervious.outputDim[0] * self.pervious.outputDim[1] * self.pervious.outputDim[2]
-            elif isinstance(self.pervious , FCBlock):
-                params["in_features"]  = self.pervious.outputDim
+        if self.previous is not None:
+            if isinstance(self.previous , ConvBlock):
+                params["in_features"]  = self.previous.outputDim[0] * self.previous.outputDim[1] * self.previous.outputDim[2]
+            elif isinstance(self.previous , FCBlock):
+                params["in_features"]  = self.previous.outputDim
 
         if self.linear is None:
 
@@ -642,7 +642,7 @@ class FCBlock(Block):
     def forward(self, x):
 
         if self.linear is not None:
-            x = self.liner(x)
+            x = self.linear(x)
 
             if self.norm  is not None:
                 x = self.norm(x)

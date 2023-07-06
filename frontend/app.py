@@ -23,10 +23,10 @@ if user_id is None:
     st.experimental_set_query_params(user_id=user_id)
 
 if "model_id" not in st.session_state:
-    st.session_state.model_id = PLACEHOLDER_MODEL["model_id"]
+    st.session_state.model_id = PLACEHOLDER_MODEL["id"]
     st.session_state.loaded_model = {
         "props": {
-            "value": PLACEHOLDER_MODEL["model_id"],
+            "value": PLACEHOLDER_MODEL["id"],
             "children": PLACEHOLDER_MODEL["name"],
         }
     }

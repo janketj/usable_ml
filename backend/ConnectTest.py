@@ -29,7 +29,7 @@ model =  Model(name = "Model")
 blockInfo_c ={
             "type": "ConvBlock",
             "name": "Con_2",
-            "pervious" : None,
+            "previous" : None,
 
             "layers": {
                 "conv": {
@@ -71,7 +71,7 @@ print(model.getBlockList()[0].getInfo())
 blockInfo_fc ={
             "type": "FCBlock",
             "name": "Block_1fc",
-            "pervious" : 0,
+            "previous" : 0,
 
             "layers": {
                 "linear": {"in_features" : 10,
@@ -102,7 +102,7 @@ dict = {"id" : 0, # no chnage
             "info" : {
                         "type": "ConvBlock", # not changable
                         "name": "NewCon_2",
-                        "pervious" : None, # not changable
+                        "previous" : None, # not changable
 
             "layers": {
                 "conv": None ,
@@ -132,7 +132,7 @@ dict = {"id" : 0,
             "info" : {
                         "type": "ConvBlock",   # do not need this info
                         "name": "NewCon_2",  # do not need this info
-                        "pervious" : None, # do not need this info
+                        "previous" : None, # do not need this info
 
             "layers": {
                 "conv": False, # can not be removed same for linear
@@ -160,7 +160,7 @@ dict = {"id" : 0,
             "info" : {
                         "type": "ConvBlock",   # do not need this info
                         "name": "NewCon_2",  # do not need this info
-                        "pervious" : None, # do not need this info
+                        "previous" : None, # do not need this info
 
             "layers": {
                 "conv": True, 

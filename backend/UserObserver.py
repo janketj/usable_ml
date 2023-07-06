@@ -4,7 +4,7 @@ from MessageType import MessageType
 
 from model_loader import load_model, save_model, create_model, load_models
 
-class User(Observer):
+class UserObserver(Observer):
     def __init__(self, user_models, user_trainings):
         self.user_models = user_models
         self.user_trainings = user_trainings
@@ -28,6 +28,7 @@ class User(Observer):
         self.user_models[user_id] = {}
         self.user_models[user_id]['default'] = defaultModel
         self.user_trainings[user_id] = Training(defaultModel)
+        print(self.user_trainings[user_id] )
         return load_models()
 
 

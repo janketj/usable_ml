@@ -8,19 +8,22 @@ from Evaluation import Evaluation
 class Training:
     def __init__(self, model):
         self.model = model
-        self.optimizer = None
-        self.loss_function = None
+        self.learning_rate = 0.3
+        self.optimizer = SGD(
+            self.model.parameters(), lr=self.learning_rate, momentum=0.5
+        )
+        self.loss_function = nn.CrossEntropyLoss
         self.batch_size = 256
         self.epochs = 10
         self.use_cuda = False
         self.device = torch.device("cpu")
         self.is_training = False
-        self.learning_rate = 0.3
         self.current_epoch = 0
         self.current_batch = 0
         self.loss = 100
-        self.train_loader = get_data_loaders(batch_size=self.batch_size, train=True)
-        self.test_loader = get_data_loaders(batch_size=self.batch_size, train=False)
+        self.accuracy = 0
+        self.train_loader = get_data_loaders(batch_size=self.batch_size, test=False)
+        self.test_loader = get_data_loaders(batch_size=self.batch_size, test=True)
 
     def update_optimizer(self, optimizer):
         if optimizer == "SGD":

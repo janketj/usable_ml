@@ -6,7 +6,7 @@ from random import random
 from model_loader import load_model, save_model, create_model
 
 
-class Training(Observer):
+class TrainingObserver(Observer):
     def __init__(self, user_trainings):
         self.user_trainings = user_trainings
 
@@ -65,14 +65,14 @@ class Training(Observer):
         """
         get current progress
         """
-        """ 
-        trainingInstance = self.user_trainings[user_id]
-        return {
-            "message": "current progress",
-            "progress": trainingInstance.current_epoch  + (trainingInstance.current_batch / trainingInstance.batch_size) random() * trainingInstance.epochs,
-            "accuracy": trainingInstance.accuracy,
-            "loss": trainingInstance.loss,
-        } """
+        if user_id in self.user_trainings:
+            trainingInstance = self.user_trainings[user_id]
+            return {
+                "message": "current progress",
+                "progress": trainingInstance.current_epoch  + (trainingInstance.current_batch / trainingInstance.batch_size),
+                "accuracy": trainingInstance.accuracy,
+                "loss": trainingInstance.loss,
+            }
         return {
             "message": "current progress",
             "progress": message + 0.1,

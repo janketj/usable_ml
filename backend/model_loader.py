@@ -33,11 +33,14 @@ def load_model(name):
     """
     if name in user_models:
         return user_models[name]
+    
 
     filename = os.path.join(models_dir, f"{name}.pt")
-    if not os.path.isfile(filename):
-        return None
     model = Model(name)
+
+    if not os.path.isfile(filename):
+        user_models[name] = model
+        return model
     model.load_state_dict(torch.load(filename))
     user_models[name] = model
     return model
@@ -55,7 +58,7 @@ def create_model(name):
     """
     model = Model(name)
     save_model(model)
-    return model.to_dict()
+    return model #model.to_dict()
 
 
 def load_models():
@@ -72,6 +75,6 @@ def load_models():
             model_name = os.path.splitext(filename)[0]
             model = load_model(model_name)
             if model is not None:
-                models.append(dict(name=model.name, id=model.model_id))
+                models.append(dict(name=model.name, id=model.id))
     return models
 

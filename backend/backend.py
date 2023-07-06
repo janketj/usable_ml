@@ -2,10 +2,9 @@ import multiprocessing
 from multiprocessing import Process, Queue, Event
 
 from Controller import Controller
-from TestObserver import Test
-from ModelObserver import Model
-from TrainingObserver import Training
-from UserObserver import User
+from ModelObserver import ModelObserver
+from TrainingObserver import TrainingObserver
+from UserObserver import UserObserver
 from MessageType import MessageType
 
 if __name__ == "__main__":
@@ -23,17 +22,15 @@ if __name__ == "__main__":
     user_models = {}
     user_trainings = {}
 
-    model_observer = Model(user_models)
-    training_observer = Training(user_trainings)
-    user_observer = User(user_models, user_trainings)
+    model_observer = ModelObserver(user_models)
+    training_observer = TrainingObserver(user_trainings)
+    user_observer = UserObserver(user_models, user_trainings)
 
 
     """
     Register initial observers
     """
     controller.register(MessageType.INIT_USER, user_observer)
-    controller.register(MessageType.INIT_USER, model_observer)
-    controller.register(MessageType.INIT_USER, training_observer)
 
     """
     Register model observers

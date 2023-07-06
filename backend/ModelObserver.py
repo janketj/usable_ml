@@ -3,7 +3,7 @@ from MessageType import MessageType
 
 from model_loader import load_model, save_model, create_model
 
-class Model(Observer):
+class ModelObserver(Observer):
     def __init__(self, user_models):
         self.user_models = user_models
 
