@@ -1,6 +1,8 @@
 from block import *
 import torch.nn as nn
 import torch.nn.functional as F
+import uuid
+
 
 class BlockList(list):
     def __str__(self):
@@ -10,12 +12,10 @@ class BlockList(list):
 
 
 class Model(nn.Module):
-    id_counter = 0
     def __init__(self, name):
         super().__init__()
 
-        self.id = Model.id_counter
-        Model.id_counter += 1
+        self.id = str(uuid.uuid4())
 
         self.name = name
         self.head = None
