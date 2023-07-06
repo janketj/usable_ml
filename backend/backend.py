@@ -41,6 +41,13 @@ if __name__ == "__main__":
     controller.register(MessageType.LOAD_MODEL, model_observer)
     controller.register(MessageType.SAVE_MODEL, model_observer)
     controller.register(MessageType.CREATE_MODEL, model_observer)
+    controller.register(MessageType.ADD_BLOCK, model_observer)
+    controller.register(MessageType.EDIT_BLOCK, model_observer)
+    controller.register(MessageType.REMOVE_BLOCK, model_observer)
+    controller.register(MessageType.REMOVE_BLOCK_LAYER, model_observer)
+    controller.register(MessageType.FREEZE_BLOCK_LAYER, model_observer)
+    controller.register(MessageType.UNFREEZE_BLOCK_LAYER, model_observer)
+
 
     """
     Register training observers

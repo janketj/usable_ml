@@ -1,6 +1,6 @@
 import os
 import torch
-from model import Model
+from modelLinkedBlocks import Model
 
 # Global variable for the models directory
 models_dir = "models"
