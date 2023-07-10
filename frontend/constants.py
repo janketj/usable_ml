@@ -12,7 +12,7 @@ COLORS = {
 
 ACTIVATION_TYPES = ["None", "ReLU", "LeakyReLU", "Sigmoid", "Tanh", "Softmax"]
 POOLING_TYPES = ["max", "avg"]
-BLOCK_TYPES = ["FCBlock", "ConvBlock"]
+BLOCK_TYPES = ["Please Select", "FCBlock", "convBlock"]
 
 PLACEHOLDER_ACCURACY = [
     {
@@ -59,27 +59,26 @@ PLACEHOLDER_LOSS = [
 ]
 
 BLOCK_DEFAULT_PARAMS = {
-    "in_channels": 16,
-    "out_channels": 32,
-    "Linear_bias": True,
-    "Conv_padding": 2,
-    "Conv_kernel_size": 4,
-    "Conv_stride": 1,
-    "Conv_dilation": 1,
-    "Conv_bias": True,
-    "use_Norm_layer": False,
-    "Norm_num_features": 1,
-    "Norm_out_features": 1,
-    "Norm_momentum": 0.5,
-    "Activ_type": 1,
-    "use_Drop_layer": False,
-    "Drop_p": 0.5,
-    "Drop_inplace": False,
-    "use_Pool_layer": False,
-    "Pool_type": "max",
-    "Pool_stride": 1,
-    "Pool_padding": 2,
-    "Pool_kernel_size": 4,
+    "linear_bias": True,
+    "linear_in_features": 16,
+    "conv_padding": 2,
+    "conv_kernel_size": 4,
+    "conv_stride": 1,
+    "conv_dilation": 1,
+    "conv_bias": True,
+    "use_norm_layer": False,
+    "norm_num_features": 1,
+    "norm_out_features": 1,
+    "norm_momentum": 0.5,
+    "activ_type": 1,
+    "use_drop_layer": False,
+    "drop_p": 0.5,
+    "drop_inplace": False,
+    "use_pool_layer": False,
+    "pool_type": "max",
+    "pool_stride": 1,
+    "pool_padding": 2,
+    "pool_kernel_size": 4,
 }
 
 PLACEHOLDER_MODEL = {

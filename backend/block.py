@@ -12,7 +12,7 @@ class Block(nn.Module):
         self.id = Block.id_counter
         Block.id_counter += 1
 
-        self.name = name 
+        self.name = name
 
         self.next = None
 
@@ -21,60 +21,40 @@ class Block(nn.Module):
         else:
             self.previous = None
 
-
-
-        self.norm = None 
-        self.activ = None  
+        self.norm = None
+        self.activ = None
         self.drop = None
 
         self.normParamas = None
-        self.activParamas= None
+        self.activParamas = None
         self.dropParamas = None
-        
 
         self.globals_dict = globals()
-        self.globals_dict['nn'] = nn
-        self.globals_dict['F'] = F
-        self.globals_dict['self'] = self
-
-
-
+        self.globals_dict["nn"] = nn
+        self.globals_dict["F"] = F
+        self.globals_dict["self"] = self
 
     def changeName(self, name):
         self.name = name
-        
 
     def __str__(self):
         return str(self.getInfo())
-    
-
 
     def getLayers(self):
-
         return None
-    
 
-    def getInfo(self): 
-
-        dict = {"type" : self.type,
-                "name" : self.name,
-                "previous" : self.getPreviousId(), 
-                "layers" : self.getLayers()
-                }
-        
-
-        return {"id" : self.getId(), "info" : dict}
-    
-
-
-
+    def getInfo(self):
+        return {
+            "id": self.getId(),
+            "type": self.type,
+            "name": self.name,
+            "previous": self.getPreviousId(),
+            "layers": self.getLayers(),
+        }
 
     def assignPrevious(self, previous):
-        
         self.previous = previous
         self.previous.assignNext(self)
-
-
 
     def getPreviousId(self):
         if self.previous is not None:
@@ -82,25 +62,13 @@ class Block(nn.Module):
         else:
             return None
 
-        
-        
-
     def assignNext(self, next):
         self.next = next
-        
-
-        
-    
 
     def getId(self):
-
         return self.id
-        
-
-
 
     def createActiv(self, params):
-
         """
         Creates a activation layer.
 
@@ -112,18 +80,16 @@ class Block(nn.Module):
             bool:  True if the layer is added, False otherwise
         """
 
-
         if self.activ is None:
             type = params["type"]
             exec(f"self.activ  = nn.{type}()", self.globals_dict)
-            self.activParamas = {"type" : type}
+            self.activParamas = {"type": type}
             return True
         else:
             print("The block already has a activation layer.")
             return False
-        
-    def createNorm(self, params):
 
+    def createNorm(self, params):
         """
         Creates a normalization Layer.
 
@@ -141,7 +107,6 @@ class Block(nn.Module):
         #           "track_running_stats" : A boolean value
         #          }
 
-
         # num_features (int): The number of channels in the input.
         # eps (float): A value added to the denominator for numerical stability.
         # momentum (float): The value used for the running mean and variance computation.
@@ -149,7 +114,7 @@ class Block(nn.Module):
         # track_running_stats (bool): If set to True, running estimates are used during inference.
 
         if self.norm is None:
-            self.norm  = nn.BatchNorm2d(**params)
+            self.norm = nn.BatchNorm2d(**params)
             self.normParamas = params
             return True
         else:
@@ -157,7 +122,6 @@ class Block(nn.Module):
             return False
 
     def createDrop(self, params):
-
         """
         Creates a dropout layer.
 
@@ -168,27 +132,22 @@ class Block(nn.Module):
             bool:  True if the layer is added, False otherwise
         """
 
-
-
         # params = {"p" : A floating-point value between 0 and 1 (around 0.5 ),
         #           "inplace" : A boolean value ,
         #          }
-
 
         # p (float): The probability of an element to be zeroed. It must be a value between 0 and 1.
         # inplace (bool): If set to True, the operation is performed in-place, i.e., it modifies the input tensor.
 
         if self.drop is None:
-            self.drop  = nn.Dropout(**params)
+            self.drop = nn.Dropout(**params)
             self.dropParamas = params
             return True
         else:
             print("The block already has a dropout layer or it is final block.")
             return False
 
-
     def removeLayer(self, layerType):
-
         """
         Removes the layer.
 
@@ -200,20 +159,16 @@ class Block(nn.Module):
         """
         # conv,  activ,  pool, linear, drop, norm
 
-        if  layerType is not None:
-
-            setattr(self, layerType , None)
+        if layerType is not None:
+            setattr(self, layerType, None)
 
             return True
-        
+
         else:
             print("Wrong type or the layer does not exist")
             return False
 
-
-
     def changeLayerParameters(self, layerType, newParams):
-
         """
         Changes the parametres of the layer.
 
@@ -226,7 +181,6 @@ class Block(nn.Module):
         """
         # We will chnage parametres of "Convolutional Layer", "MaxPooling Layer", "AvgPooling Layer", "Linear Layer"
 
-
         if self.removeLayer(layerType):
             # createConv, createPool, createLinear, createNorm, createDrop
             # conv,  pool, linear, norm, drop
@@ -234,9 +188,8 @@ class Block(nn.Module):
 
             exec(f"self.{layerClass}({newParams})")
             return True
-        
-    def freezeLayer(self, layerType):
 
+    def freezeLayer(self, layerType):
         """
         Freezes the Layer.
 
@@ -256,12 +209,8 @@ class Block(nn.Module):
         else:
             print("No Conv layer defined")
             return False
-        
-
-
 
     def unfreezeLayer(self, layerType):
-
         """
         Unfreezes the Layer.
 
@@ -280,54 +229,40 @@ class Block(nn.Module):
         else:
             print("No Conv layer defined")
             return False
-        
-
-  
-
 
     def forward(self, x):
-
         return x
-    
 
 
 class ConvBlock(Block):
-
-    
     def __init__(self, name, previous):
-        super().__init__(name,  previous)
+        super().__init__(name, previous)
 
         self.type = "ConvBlock"
-        
-        self.conv = None
-        self.pool = None 
 
+        self.conv = None
+        self.pool = None
 
         self.convParamas = None
-        self.poolParamas = None 
+        self.poolParamas = None
 
         self.outputDim = None
 
-        #dummy params
-        params = {"in_channels" : None, "out_channels" : 3, "kernel_size" : (3, 3)} 
+        # dummy params
+        params = {"in_channels": None, "out_channels": 3, "kernel_size": (3, 3)}
         self.createConv(params)
-
 
     def getLayers(self):
         layers = {
-                    "conv" : self.convParamas,
-                    "norm" : self.normParamas,
-                    "activ" : self.activParamas,
-                    "drop" : self.dropParamas,
-                    "pool" : self.poolParamas
-                }
+            "conv": self.convParamas,
+            "norm": self.normParamas,
+            "activ": self.activParamas,
+            "drop": self.dropParamas,
+            "pool": self.poolParamas,
+        }
         return layers
 
-         
-
-
     def createConv(self, params):
-
         """
         Creates a Convolutional layer.
 
@@ -337,15 +272,14 @@ class ConvBlock(Block):
         Returns:
             bool:  True if the layer is created, False otherwise
         """
-       
-        
+
         # params = {"in_channels" : Any positive integer value,
         #          "out_channels" : Any positive integer value,
-        #          "kernel_size" : A positive integer value k or  A tuple (kH, kW), 
+        #          "kernel_size" : A positive integer value k or  A tuple (kH, kW),
         #          "stride" : A positive integer value s or  A tuple (sH, sW),
         #          "padding" : 0 (No padding) or A positive integer value p or A tuple (pH, pW),
-        #          "dilation" : A positive integer value d or  A tuple (dH, dW),, 
-        #          "groups" : Any positive integer value. Default is 1, # I think we can skip this 
+        #          "dilation" : A positive integer value d or  A tuple (dH, dW),,
+        #          "groups" : Any positive integer value. Default is 1, # I think we can skip this
         #          "bias" : A Boolean value. Default is True
         #          }
 
@@ -362,27 +296,19 @@ class ConvBlock(Block):
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
         if self.previous is not None:
-                params["in_channels"] = self.previous.outputDim[0]
+            params["in_channels"] = self.previous.outputDim[0]
         else:
-                params["in_channels"] = 1
-
+            params["in_channels"] = 1
 
         if self.conv is None:
-
-
-
             self.conv = nn.Conv2d(**params)
             self.convParamas = params
             self.mutateOutputDim()
             return True
         else:
-            
             return self.changeLayerParameters("conv", params)
-        
 
-
-    def createPool(self,  params):
-
+    def createPool(self, params):
         """
         Creates a Pooling layer.
 
@@ -397,18 +323,15 @@ class ConvBlock(Block):
         type = params["type"]
         params = params["params"]
 
-        if type ==  "max":
+        if type == "max":
             return self.createMaxPool(params)
-        elif type ==  "avg":
+        elif type == "avg":
             return self.createAvgPool(params)
         else:
             print("Wrong type")
             return False
 
-
-
     def createMaxPool(self, params):
-
         """
         Creates a MaxPooling layer.
 
@@ -419,7 +342,6 @@ class ConvBlock(Block):
             bool:  True if the layer is added, False otherwise
         """
 
-
         # params = {"kernel_size" : A positive integer value k or  A tuple (kH, kW),
         #           "stride" : A positive integer value s or  A tuple (sH, sW),
         #          "padding" : 0 (No padding) or A positive integer value p or A tuple (pH, pW),
@@ -427,7 +349,6 @@ class ConvBlock(Block):
         #          "return_indices" : bool, Default is False.
         #          "ceil_mode" : bool, Default is False.
         #          }
-
 
         # kernel_size: Input data type: int or Tuple[int, int]. Specifies the size of the max pooling window. If an integer is provided, it represents a square window size. If a tuple of two integers (kH, kW) is provided, it represents different height and width dimensions for the window.
         # stride: Input data type: int or Tuple[int, int]. Specifies the stride of the max pooling operation. If an integer is provided, it represents a square stride value. If a tuple of two integers (sH, sW) is provided, it represents different stride values for height and width.
@@ -440,16 +361,12 @@ class ConvBlock(Block):
             self.pool = nn.MaxPool2d(**params)
             self.mutateOutputDim()
             return True
-        
+
         else:
             print("The block already has a pooling layer.")
             return False
 
-        
-    
-
     def createAvgPool(self, params):
-
         """
         Creates a AvgPooling layer.
 
@@ -460,7 +377,6 @@ class ConvBlock(Block):
             bool:  True if the layer is added, False otherwise
         """
 
-
         # params = {"kernel_size" : A positive integer value k or  A tuple (kH, kW),
         #           "stride" : A positive integer value s or  A tuple (sH, sW),
         #           "padding" : 0 (No padding) or A positive integer value p or A tuple (pH, pW),
@@ -468,32 +384,27 @@ class ConvBlock(Block):
         #           "count_include_pad" : bool Default is True
         #          }
 
-
         # kernel_size: Input data type: int or Tuple[int, int]. Specifies the size of the average pooling window. If an integer is provided, it represents a square window size. If a tuple of two integers (kH, kW) is provided, it represents different height and width dimensions for the window.
         # stride: Input data type: int or Tuple[int, int]. Specifies the stride of the average pooling operation. If an integer is provided, it represents a square stride value. If a tuple of two integers (sH, sW) is provided, it represents different stride values for height and width.
         # padding: Input data type: int or Tuple[int, int]. Specifies the amount of padding added to the input tensor. If an integer is provided, it adds the same amount of padding to all sides. If a tuple of two integers (pH, pW) is provided, it adds different padding values to the height and width dimensions.
         # ceil_mode: Input data type: bool. Specifies whether to use ceil mode for the output size calculation. Default is False.
         # count_include_pad: Input data type: bool. Specifies whether to include padding in the averaging calculation. Default is True.
 
-
-
         if self.pool is None:
             self.pool = nn.AvgPool2d(**params)
             self.mutateOutputDim()
             return True
-        
+
         else:
             print("The block already has a pooling layer.")
             return False
-        
-    def mutateOutputDim(self):
 
+    def mutateOutputDim(self):
         # Input dimensions
         if self.previous is not None:
-            inputWidth, inputHeight, _  = self.previous.outputDim
+            inputWidth, inputHeight, _ = self.previous.outputDim
         else:
-            inputWidth, inputHeight, _  = (28, 28, 1)
-
+            inputWidth, inputHeight, _ = (28, 28, 1)
 
         # Convolutional layer parameters
         kernel_size = self.conv.kernel_size
@@ -501,12 +412,14 @@ class ConvBlock(Block):
         padding = self.conv.padding
         num_filters = self.conv.out_channels
 
-        
         # Calculate output size for the convolutional layer
-        outWidth = math.floor((inputWidth - kernel_size[0] + 2 * padding[0]) / stride[0]) + 1
-        outHeight = math.floor((inputHeight - kernel_size[1]+ 2 * padding[1]) / stride[1]) + 1
+        outWidth = (
+            math.floor((inputWidth - kernel_size[0] + 2 * padding[0]) / stride[0]) + 1
+        )
+        outHeight = (
+            math.floor((inputHeight - kernel_size[1] + 2 * padding[1]) / stride[1]) + 1
+        )
         outChannels = num_filters
-
 
         # Pooling layer parameters
         if self.pool is not None:
@@ -517,17 +430,13 @@ class ConvBlock(Block):
             outWidth = math.floor((outWidth - Pool_size) / Pool_stride) + 1
             outHeight = math.floor((outHeight - Pool_size) / Pool_stride) + 1
 
-        self.outputDim = outChannels#(outWidth, outHeight, )
-
-
-
+        self.outputDim = outChannels  # (outWidth, outHeight, )
 
     def forward(self, x):
-
         if self.conv is not None:
             x = self.conv(x)
 
-            if self.norm  is not None:
+            if self.norm is not None:
                 x = self.norm(x)
 
             if self.activ is not None:
@@ -541,42 +450,36 @@ class ConvBlock(Block):
 
         if self.next is not None:
             x = self.next(x)
-    
+
         return x
-    
+
 
 class FCBlock(Block):
-
     def __init__(self, name, previous):
-        super().__init__(name, previous) 
+        super().__init__(name, previous)
 
         self.type = "FCBlock"
 
-        self.linear = None 
+        self.linear = None
 
         self.outputDim = None
 
-        self.linearParams = None 
+        self.linearParams = None
 
-        #dummy params
-        params = {"in_features" : 10, "out_features" : 10}
+        # dummy params
+        params = {"in_features": 10, "out_features": 10}
         self.createLinear(params)
-
 
     def getLayers(self):
         layers = {
-                    "linear" : self.linearParams,
-                    "norm" : self.normParamas,
-                    "activ" : self.activParamas,
-                    "drop" : self.dropParamas,
-                           }
+            "linear": self.linearParams,
+            "norm": self.normParamas,
+            "activ": self.activParamas,
+            "drop": self.dropParamas,
+        }
         return layers
 
-
-
-
     def createLinear(self, params):
-
         """
         Creates a fully connected layer.
 
@@ -592,59 +495,55 @@ class FCBlock(Block):
         #           "bias" : A Boolean value. Default is True,
         #          }
 
-
         # in_features: Data type: int. Specifies the size of each input sample. It represents the number of input features.
         # out_features: Data type: int. Specifies the size of each output sample. It represents the number of output features.
         # bias: Data type: bool, optional. Specifies whether to include a bias term in the linear transformation. Default is True. If set to False, the layer will not learn an additive bias.
-        
+
         if self.previous is not None:
-            if isinstance(self.previous , ConvBlock):
-                params["in_features"]  = self.previous.outputDim[0] * self.previous.outputDim[1] * self.previous.outputDim[2]
-            elif isinstance(self.previous , FCBlock):
-                params["in_features"]  = self.previous.outputDim
+            if isinstance(self.previous, ConvBlock):
+                params["in_features"] = (
+                    self.previous.outputDim[0]
+                    * self.previous.outputDim[1]
+                    * self.previous.outputDim[2]
+                )
+            elif isinstance(self.previous, FCBlock):
+                params["in_features"] = self.previous.outputDim
 
         if self.linear is None:
+            if self.next is None:
+                params["out_features"] = 10
 
-
-                if self.next is  None:
-                    params["out_features"]  = 10
-
-
-                self.linear = nn.Linear(**params)
-                self.linearParams = params
-                self.mutateOutputDim()
-                return True
+            self.linear = nn.Linear(**params)
+            self.linearParams = params
+            self.mutateOutputDim()
+            return True
         else:
             return self.changeLayerParameters("linear", params)
 
-        
     def assignNext(self, next):
-        if isinstance(next , FCBlock):
+        if isinstance(next, FCBlock):
             return super().assignNext(next)
         else:
-            print("After a fully connected block, you are not allowed to have a Conv layer")
+            print(
+                "After a fully connected block, you are not allowed to have a Conv layer"
+            )
 
-    
     def deleteNext(self):
         super().deleteNext()
-        self.linearParams["out_features"]  = 10
+        self.linearParams["out_features"] = 10
         self.changeLayerParameters(self, "linear", self.linearParams)
         return super().deleteNext()
 
     def mutateOutputDim(self):
-
         output = self.linear.out_features
 
-        self.outputDim =  (output)
-        
-
+        self.outputDim = output
 
     def forward(self, x):
-
         if self.linear is not None:
             x = self.linear(x)
 
-            if self.norm  is not None:
+            if self.norm is not None:
                 x = self.norm(x)
 
             if self.activ is not None:
@@ -655,7 +554,5 @@ class FCBlock(Block):
 
         if self.next is not None:
             x = self.next(x)
-    
+
         return x
-            
-    

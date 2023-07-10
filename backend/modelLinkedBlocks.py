@@ -18,7 +18,6 @@ DEFAULT_CONV_BLOCK = {
             "groups": 1,
             "bias": True,
         },
-        "norm":  None,
         "activ": {  # can be None
             "type": "ReLU",
         },
@@ -46,7 +45,6 @@ DEFAULT_FC_BLOCK = {
             "out_features": 10,
             "bias": True,
         },
-        "norm": None,
         "activ": {
             "type": "ReLU",
         },
@@ -56,16 +54,15 @@ DEFAULT_FC_BLOCK = {
 
 
 class BlockList(list):
-    def __str__(self):
-        elements = ", ".join(str(item) for item in self)
-        return f"[{elements}]"
+    def to_list(self):
+        return [item.getInfo() for item in self]
 
 
 class Model(nn.Module):
     def __init__(self, name):
         super(Model, self).__init__()
 
-        self.id = str(uuid.uuid4())
+        self.id = name #str(uuid.uuid4())
 
         self.name = name
         self.head = None
@@ -73,9 +70,8 @@ class Model(nn.Module):
         self.createBlock(DEFAULT_CONV_BLOCK)
         self.createBlock(DEFAULT_FC_BLOCK)
 
-    def __str__(self):
-        dict = {"name": self.name, "id": self.id, "blockList": str(self.blockList)}
-        return str(dict)
+    def to_dict(self):
+        return dict(name=self.name, id=self.id, blocks=self.blockList.to_list())
 
     def addBlock(self, block):
         self.blockList.append(block)
@@ -118,16 +114,16 @@ class Model(nn.Module):
 
         convBlock.createConv(layers["conv"])
 
-        if layers["norm"] is not None:
+        if "norm" in layers:
             convBlock.createNorm(layers["norm"])
 
-        if layers["activ"] is not None:
+        if "activ" in layers:
             convBlock.createActiv(layers["activ"])
 
-        if layers["drop"] is not None:
+        if "drop" in layers:
             convBlock.createDrop(layers["drop"])
 
-        if layers["pool"] is not None:
+        if "pool" in layers:
             convBlock.createPool(layers["pool"])
 
         return convBlock
@@ -137,13 +133,13 @@ class Model(nn.Module):
 
         fcBlock.createLinear(layers["linear"])
 
-        if layers["norm"] is not None:
+        if "norm" in layers:
             fcBlock.createNorm(layers["norm"])
 
-        if layers["activ"] is not None:
+        if "activ" in layers:
             fcBlock.createActiv(layers["activ"])
 
-        if layers["drop"] is not None:
+        if "drop" in layers:
             fcBlock.createDrop(layers["drop"])
 
         return fcBlock

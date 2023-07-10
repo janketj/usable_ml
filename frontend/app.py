@@ -94,11 +94,6 @@ if "predicted_class" not in st.session_state:
 
 if "training_events" not in st.session_state:
     st.session_state.training_events = []
-    """ {
-        "value": i,
-        "label": i,
-    }
-    for i in range(st.session_state.epochs + 1) """
     dump_state("training_events", st.session_state.training_events)
 
 st.session_state.training_events = get_state("training_events")

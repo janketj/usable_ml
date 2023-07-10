@@ -16,8 +16,8 @@ def model_page():
             "borderRadius": 2,
             "p": 2,
             "boxShadow": 1,
-            "minHeight": 500,
-            "height": 500,
+            "minHeight": 600,
+            "height": 600,
             "background": COLORS["bg-paper"],
         },
     ):
@@ -80,4 +80,4 @@ def model_page():
                     block_adder(b_index)
                     b_index += 1
             if st.session_state.model and len(st.session_state.model["blocks"]) < 1:
-                block_adder(0)
+                block_adder(-1)

@@ -16,6 +16,7 @@ def save_model(model):
     Args:
         model: The model to save.
     """
+    print(model.id)
     os.makedirs(models_dir, exist_ok=True)
     filename = os.path.join(models_dir, f"{model.id}.pt")
     torch.save(model.state_dict(), filename)

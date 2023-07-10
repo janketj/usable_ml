@@ -93,4 +93,4 @@ class ModelObserver(Observer):
         """
         Return model info
         """
-        return self.user_models[user_id][model_id].getInfo()
+        return self.user_models[user_id][model_id].to_dict()

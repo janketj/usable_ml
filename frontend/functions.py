@@ -16,8 +16,12 @@ def catch_all(messageType, data=None):
     if messageType == "get_progress":
         update_progress(data)
     if messageType == "init_user":
-        dump_state("existing_models", data)
+        dump_state("existing_models", data["existing_models"])
+        dump_state("model", data["defaultModel"])
     if messageType == "create_model":
+        update_existing_models(data["model_id"], data["name"])
+        update_model(data)
+    if messageType == "start_training":
         update_existing_models(data["model_id"], data["name"])
         update_model(data)
 
@@ -82,17 +86,13 @@ def interrupt():
 
 
 def start_training():
-    if "progress" not in st.session_state or st.session_state.progress == 0:
-        send_message(
-            MessageType.START_TRAINING, dict(model="blub")
-        )  # TODO: initialize model with default model?
-    st.session_state.is_training = 1
     send_message(MessageType.START_TRAINING)
+    st.session_state.is_training = 1
 
 
 def pause_training():
-    st.session_state.is_training = 0
     send_message(MessageType.STOP_TRAINING)
+    st.session_state.is_training = 0
 
 
 def reset_training():

@@ -23,7 +23,12 @@ def layer(k, v, is_open):
             mui.Typography(k, variant="h6")
             if is_open:
                 for label, value in v.items():
-                    mui.Typography(label + ": " + str(value))
+                    print(label)
+                    if label == "params":
+                        for pl, pv in value.items():
+                            mui.Typography(pl + ": " + str(pv))
+                    else:
+                        mui.Typography(label + ": " + str(value))
 
 
 def block(block, index):
@@ -35,11 +40,9 @@ def block(block, index):
         edit_block = {
             "type": block["type"],
             "block_type": BLOCK_TYPES.index(block["type"]),
-            "in_channels": block["in_channels"],
-            "out_channels": block["out_channels"],
-            "use_Norm_layer": "Norm" in block["layers"],
-            "use_Drop_layer": "Drop" in block["layers"],
-            "use_Pool_layer": "Pool" in block["layers"],
+            "use_norm_layer": "norm" in block["layers"],
+            "use_drop_layer": "drop" in block["layers"],
+            "use_pool_layer": "pool" in block["layers"],
         }
         for k, v in block["layers"].items():
             for pk, pv in v.items():
@@ -93,8 +96,6 @@ def block(block, index):
                     mui.icon.ZoomIn()
         direction = "row" if is_open else "column"
         padding_top = "32px" if is_open else "8px"
-        if is_open:
-            mui.Typography(f'in: {block["in_channels"]}, out: {block["out_channels"]}')
         with mui.Stack(
             direction=direction,
             spacing="8px",
@@ -104,7 +105,8 @@ def block(block, index):
             },
         ):
             for k, v in block["layers"].items():
-                layer(k, v, is_open)
+                if v is not None:
+                    layer(k, v, is_open)
 
         if is_open:
             mui.Box(
