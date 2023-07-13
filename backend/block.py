@@ -430,7 +430,7 @@ class ConvBlock(Block):
             outWidth = math.floor((outWidth - Pool_size) / Pool_stride) + 1
             outHeight = math.floor((outHeight - Pool_size) / Pool_stride) + 1
 
-        self.outputDim = outChannels  # (outWidth, outHeight, )
+        self.outputDim = (outWidth, outHeight, outChannels)
 
     def forward(self, x):
         if self.conv is not None:
