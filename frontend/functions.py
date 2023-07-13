@@ -13,7 +13,7 @@ def catch_all(messageType, data=None):
     if messageType == "get_progress":
         update_progress(data)
         return
-    print(f"FRONTEND: Received {messageType} with data {data}")
+    print(f"FRONTEND: Received {messageType}")
     if messageType == "update_params":
         add_training_event(data)
     if messageType == "init_user":
@@ -27,7 +27,8 @@ def catch_all(messageType, data=None):
     if messageType == "stop_training":
         add_training_event(data)
     if messageType == "evaluate_digit":
-        print(data)
+        print(data["prediction"])
+        dump_state("prediction", data)
 
 
 def add_training_event(data):
@@ -65,16 +66,12 @@ def init_user():
 
 def send(msg, receiver: str = "tcp://localhost:5555"):
     messageType = msg["messageType"]
-    if messageType != "get_progress":
-        print("Sending message %s …" % msg)
     sio.emit(messageType, msg)
 
 
 def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
     model_id = st.session_state.model_id
-    if messageType != "get_progress":
-        print(f"Sending message {messageType} to {user_id}")
     send(
         dict(
             messageType=messageType,
@@ -153,13 +150,17 @@ def get_progress():
     st.session_state.vis_data = get_state("vis_data")
     send_message(MessageType.GET_PROGRESS, st.session_state.progress)
 
+def update():
+    st.session_state.training_events = get_state("training_events")
+    st.session_state.model = get_state("model")
+    st.session_state.existing_models = get_state("existing_models")
+    st.session_state.prediction = get_state("prediction")
 
 def update_params():
     values = {
         "learning_rate": st.session_state.learning_rate,
         "epochs": st.session_state.epochs,
         "batch_size": st.session_state.batch_size,
-        "loss_function": st.session_state.loss_function["props"]["value"],
         "optimizer": st.session_state.optimizer["props"]["value"],
         "use_cuda": st.session_state.use_cuda,
     }

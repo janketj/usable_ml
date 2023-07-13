@@ -6,7 +6,7 @@ from functions import (
     start_training,
     pause_training,
     reset_training,
-    save_model,
+    update,
     get_progress,
 )
 
@@ -18,6 +18,7 @@ def play_bar():
             and st.session_state.is_training
         ):
             event.Interval(1, get_progress)
+        event.Interval(4, update)
 
         with mui.Box(
             sx={

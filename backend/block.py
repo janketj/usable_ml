@@ -514,8 +514,8 @@ class FCBlock(Block):
                 params["in_features"] = self.previous_output_dim
 
         if self.linear is None:
-            if self.next is None:
-                params["out_features"] = 10
+            """ if self.next is None:
+                params["out_features"] = 10 """
 
             self.linear = nn.Linear(params["in_features"], params["out_features"])
             self.linearParams = params
@@ -539,9 +539,7 @@ class FCBlock(Block):
         return super().deleteNext()
 
     def mutateOutputDim(self):
-        output = self.linear.out_features
-
-        self.outputDim = output
+        self.outputDim = self.linear.out_features
 
     def to_layer_list(self):
         layers = []

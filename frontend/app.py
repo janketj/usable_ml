@@ -50,6 +50,10 @@ if "progress" not in st.session_state:
     dump_state("progress", 0)
     dump_state("vis_data", st.session_state.vis_data)
 
+if "prediction" not in st.session_state:
+    st.session_state.prediction = {"prediction": None, "heatmap": None}
+    dump_state("prediction", st.session_state.prediction)
+
 if "learning_rate" not in st.session_state:
     st.session_state.learning_rate = 0.3
 if "batch_size" not in st.session_state:
@@ -61,10 +65,6 @@ if "epochs" not in st.session_state:
 if "optimizer" not in st.session_state:
     st.session_state.optimizer = {
         "props": {"value": "SGD", "children": "Stochastic Gradient Descent"}
-    }
-if "loss_function" not in st.session_state:
-    st.session_state.loss_function = {
-        "props": {"value": "cross_entropy", "children": "Cross Entropy Loss"}
     }
 
 if "use_cuda" not in st.session_state:
@@ -91,9 +91,6 @@ if "existing_models" not in st.session_state:
 if "tab" not in st.session_state:
     st.session_state.tab = "train"
 
-if "predicted_class" not in st.session_state:
-    st.session_state.predicted_class = 0
-
 if "training_events" not in st.session_state:
     st.session_state.training_events = []
     dump_state("training_events", st.session_state.training_events)
@@ -101,6 +98,7 @@ if "training_events" not in st.session_state:
 st.session_state.training_events = get_state("training_events")
 st.session_state.model = get_state("model")
 st.session_state.existing_models = get_state("existing_models")
+st.session_state.prediction = get_state("prediction")
 
 
 # train_tab, model_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])

@@ -34,18 +34,31 @@ DEFAULT_CONV_BLOCK = {
     },
 }
 
-DEFAULT_FC_BLOCK = {
+DEFAULT_FC_BLOCK1 = {
     "type": "FCBlock",
     "name": "Block_1fc",
     "previous": "Con_2",
+    "next": "Block_2fc",
     "layers": {
         "linear": {
-            "out_features": 10,
+            "out_features": 64,
             "bias": True,
         },
         "activ": {
             "type": "ReLU",
         },
+    },
+}
+
+DEFAULT_FC_BLOCK2 = {
+    "type": "FCBlock",
+    "name": "Block_2fc",
+    "previous": "Block_1fc",
+    "layers": {
+        "linear": {
+            "out_features": 10,
+            "bias": True,
+        }
     },
 }
 
@@ -73,16 +86,30 @@ class Model(nn.Module):
 
         self.name = name
         self.blockList = BlockList()
-        self.createBlock(DEFAULT_CONV_BLOCK)
-        self.createBlock(DEFAULT_FC_BLOCK)
-        self.conv_layers, self.linear_layers = self.blockList.to_layers()
+        """ self.createBlock(DEFAULT_CONV_BLOCK)
+        self.createBlock(DEFAULT_FC_BLOCK1)
+        self.createBlock(DEFAULT_FC_BLOCK2)
+        self.convolutional_layers, self.linear_layers = self.blockList.to_layers() """
+        self.convolutional_layers = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=8, stride=2, padding=2),
+            nn.Tanh(),
+            nn.MaxPool2d(kernel_size=2, stride=1),
+            nn.Conv2d(16, 32, kernel_size=4, stride=2, padding=0),
+            nn.Tanh(),
+            nn.MaxPool2d(kernel_size=2, stride=1),
+        )
+        self.linear_layers = nn.Sequential(
+            nn.Linear(512, 32),
+            nn.Tanh(),
+            nn.Linear(32, 10),
+        )
 
     def to_dict(self):
         return dict(name=self.name, id=self.id, blocks=self.blockList.to_list())
 
     def addBlock(self, block):
         if block.previous:
-            prevIndex = self.findBlockIndex(block.previous)
+            prevIndex = self.findBlockIndex(block.previous, block.previous)
             self.blockList.insert(prevIndex + 1, block)
         else:
             self.blockList.append(block)
@@ -220,7 +247,7 @@ class Model(nn.Module):
         self.blockList.pop(block_index)
 
     def forward(self, x):
-        x = self.conv_layers(x)
+        x = self.convolutional_layers(x)
         x = x.view(x.size(0), -1)
         x = self.linear_layers(x)
         return x
