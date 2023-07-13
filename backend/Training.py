@@ -4,6 +4,7 @@ from torch.optim import Optimizer, SGD, Adam
 from data import get_data_loaders
 from PIL import Image
 from Evaluation import Evaluation
+import numpy as np
 
 
 class Training:
@@ -83,11 +84,13 @@ class Training:
         # Set the model to training mode
         self.model.train()
 
-        for epoch in range(self.epochs):
+        for epoch in range(self.current_epoch, self.epochs):
             running_loss = 0.0
             self.current_batch = 0
 
-            for i, (inputs, labels) in enumerate(self.train_loader):
+            for i, (inputs, labels) in enumerate(self.train_loader, self.current_batch):
+                if not self.is_training:
+                    break
                 # Move inputs and labels to the selected device
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
@@ -138,5 +141,5 @@ class Training:
         self.is_training = False
 
     def predict_class(self,data):
-        image = Image.fromarray(data.numpy(), mode="L")
+        image = Image.fromarray(np.array(data), mode="L")
         return self.evaluation.evaluate_digit(image)

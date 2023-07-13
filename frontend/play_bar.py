@@ -6,8 +6,7 @@ from functions import (
     start_training,
     pause_training,
     reset_training,
-    skip_forward,
-    skip_backward,
+    save_model,
     get_progress,
 )
 
@@ -38,8 +37,6 @@ def play_bar():
             else:
                 with mui.Button(onClick=start_training):
                     mui.icon.PlayArrow()
-            with mui.Button(onClick=skip_backward):
-                mui.icon.FirstPage()
             mui.Slider(
                 name="progress",
                 label="progress",
@@ -91,7 +88,5 @@ def play_bar():
                     },
                 },
             )
-            with mui.Button(onClick=skip_forward):
-                mui.icon.LastPage()
-            with mui.Button(onClick=skip_forward):
+            with mui.Button(onClick=save_model()):
                 mui.icon.Download()

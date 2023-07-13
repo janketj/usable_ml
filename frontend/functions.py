@@ -106,6 +106,8 @@ def reset_training():
     dump_state("training_events", [])
     send_message(MessageType.RESET_TRAINING)
 
+def save_model():
+    send_message(MessageType.SAVE_MODEL)
 
 def skip_forward():
     if "progress" not in st.session_state:

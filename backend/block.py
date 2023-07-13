@@ -52,13 +52,9 @@ class Block(nn.Module):
 
     def assignPrevious(self, previous):
         self.previous = previous
-        self.previous.assignNext(self)
 
     def getPreviousId(self):
-        if self.previous is not None:
-            return self.previous.getId()
-        else:
-            return None
+        return self.previous
 
     def assignNext(self, next):
         self.next = next
@@ -294,7 +290,7 @@ class ConvBlock(Block):
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
         if self.previous is not None:
-            params["in_channels"] = self.previous.outputDim[0]
+            params["in_channels"] = self.previous.outputDim
         else:
             params["in_channels"] = 1
 
@@ -496,7 +492,7 @@ class FCBlock(Block):
         # in_features: Data type: int. Specifies the size of each input sample. It represents the number of input features.
         # out_features: Data type: int. Specifies the size of each output sample. It represents the number of output features.
         # bias: Data type: bool, optional. Specifies whether to include a bias term in the linear transformation. Default is True. If set to False, the layer will not learn an additive bias.
-
+    
         if self.previous is not None:
             if isinstance(self.previous, ConvBlock):
                 params["in_features"] = (
@@ -539,6 +535,7 @@ class FCBlock(Block):
 
     def forward(self, x):
         if self.linear is not None:
+            x = x.view(x.size(0), -1)
             x = self.linear(x)
 
             if self.norm is not None:
@@ -549,8 +546,5 @@ class FCBlock(Block):
 
             if self.drop is not None:
                 x = self.drop(x)
-
-        if self.next is not None:
-            x = self.next(x)
 
         return x
