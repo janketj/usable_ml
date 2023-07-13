@@ -156,4 +156,5 @@ def update_params():
         "optimizer": st.session_state.optimizer["props"]["value"],
         "use_cuda": st.session_state.use_cuda,
     }
+    st.session_state.epochs_validated = st.session_state.epochs
     send_message(MessageType.UPDATE_PARAMS, values)

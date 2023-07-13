@@ -2,10 +2,10 @@ import streamlit as st
 from streamlit_elements import nivo
 
 
-def nivo_timechart(data, name, height, margin=0):
+def nivo_timechart(data, name, height, margin=0, maxY=100):
+    gridYValues = [i for i in range(0,maxY+1, round(maxY/ 5))]
     nivo.Line(
         height=height,
-        enableGridX=False,
         data=[
             {
                 "id": name,
@@ -25,6 +25,7 @@ def nivo_timechart(data, name, height, margin=0):
         },
         axisLeft={
             "tickSize": 5,
+            "tickValues": gridYValues,
             "tickPadding": 5,
             "tickRotation": 0,
             "legend": name,
@@ -34,13 +35,15 @@ def nivo_timechart(data, name, height, margin=0):
         yScale={
             "type": "linear",
             "min": 0,
-            "max": 100,
+            "max": maxY,
         },
+        gridYValues=gridYValues,
         xScale={
             "type": "linear",
             "min": 0,
-            "max": st.session_state.epochs,
+            "max": st.session_state.epochs_validated,
         },
+        gridXValues=[i for i in range(st.session_state.epochs_validated)],
         theme={
             "text": {
                 "fontSize": 11,

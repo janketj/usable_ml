@@ -56,6 +56,8 @@ if "batch_size" not in st.session_state:
     st.session_state.batch_size = 256
 if "epochs" not in st.session_state:
     st.session_state.epochs = 10
+    st.session_state.epochs_validated = 10
+    
 if "optimizer" not in st.session_state:
     st.session_state.optimizer = {
         "props": {"value": "SGD", "children": "Stochastic Gradient Descent"}
