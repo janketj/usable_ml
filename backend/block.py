@@ -1,16 +1,14 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+import uuid
 
 
 class Block(nn.Module):
-    id_counter = 0
-
     def __init__(self, name, previous):
         super().__init__()
 
-        self.id = Block.id_counter
-        Block.id_counter += 1
+        self.id = str(uuid.uuid4())
 
         self.name = name
 
@@ -513,7 +511,7 @@ class FCBlock(Block):
             if self.next is None:
                 params["out_features"] = 10
 
-            self.linear = nn.Linear(**params)
+            self.linear = nn.Linear(params["in_features"], params["out_features"])
             self.linearParams = params
             self.mutateOutputDim()
             return True

@@ -16,7 +16,6 @@ def save_model(model):
     Args:
         model: The model to save.
     """
-    print(model.id)
     os.makedirs(models_dir, exist_ok=True)
     filename = os.path.join(models_dir, f"{model.id}.pt")
     torch.save(model.state_dict(), filename)
@@ -34,7 +33,7 @@ def load_model(name):
     """
     if name in user_models:
         return user_models[name]
-    
+
 
     filename = os.path.join(models_dir, f"{name}.pt")
     model = Model(name)
@@ -42,6 +41,7 @@ def load_model(name):
     if not os.path.isfile(filename):
         user_models[name] = model
         return model
+        
     model.load_state_dict(torch.load(filename))
     user_models[name] = model
     return model
