@@ -12,7 +12,7 @@ class Training:
         self.optimizer = SGD(
             self.model.parameters(), lr=self.learning_rate, momentum=0.5
         )
-        self.loss_function = nn.CrossEntropyLoss
+        self.loss_function = nn.CrossEntropyLoss()
         self.batch_size = 256
         self.epochs = 10
         self.use_cuda = False
@@ -35,11 +35,11 @@ class Training:
 
     def update_loss_function(self, loss_function):
         if loss_function == "cross_entropy":
-            self.loss_function = nn.CrossEntropyLoss
+            self.loss_function = nn.CrossEntropyLoss()
         elif loss_function == "mse":
-            self.loss_function = nn.MSELoss
+            self.loss_function = nn.MSELoss()
         elif loss_function == "neg_log_lik":
-            self.loss_function = nn.NLLLoss
+            self.loss_function = nn.NLLLoss()
 
     def update_batch_size(self, batch_size):
         self.batch_size = batch_size
