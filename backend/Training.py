@@ -1,14 +1,15 @@
 import torch
 import torch.nn as nn
-from torch.optim import Optimizer, SGD, Adam
+from torch.optim import SGD, Adam
 from data import get_data_loaders
 from PIL import Image
 from Evaluation import Evaluation
 import numpy as np
+from modelLinkedBlocks import Model
 
 
 class Training:
-    def __init__(self, model):
+    def __init__(self, model: Model):
         self.model = model
         self.learning_rate = 0.3
         self.optimizer = SGD(
@@ -25,10 +26,13 @@ class Training:
         self.current_epoch = 0
         self.current_batch = 0
         self.loss = 100
+        self.running_loss = 100
         self.accuracy = 0
         self.train_loader = get_data_loaders(batch_size=self.batch_size, test=False)
         self.test_loader = get_data_loaders(batch_size=self.batch_size, test=True)
-        self.evaluation = Evaluation(self.model, self.test_loader, self.loss_function)
+        self.evaluation = Evaluation(self.test_loader, self.loss_function)
+        self.train_iter = iter(self.train_loader)
+        self.dataset_len = len(self.train_loader.dataset)
 
     def update_optimizer(self, optimizer):
         if optimizer == "SGD":
@@ -65,7 +69,7 @@ class Training:
             "cuda" if torch.cuda.is_available() and use_cuda else "cpu"
         )
 
-    def train(self):
+    def start_training(self):
         if (
             self.optimizer is None
             or self.loss_function is None
@@ -75,71 +79,80 @@ class Training:
             raise ValueError(
                 "Optimizer, loss function, batch size, and epochs must be set before starting training."
             )
-
         self.is_training = True
-
         # Move the model to the selected device
         self.model.to(self.device)
 
         # Set the model to training mode
         self.model.train()
 
-        for epoch in range(self.current_epoch, self.epochs):
-            running_loss = 0.0
-            self.current_batch = 0
-
-            for i, (inputs, labels) in enumerate(self.train_loader, self.current_batch):
-                if not self.is_training:
-                    break
-                # Move inputs and labels to the selected device
-                inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
-
-                # Zero the parameter gradients
-                self.optimizer.zero_grad()
-
-                # Forward pass
-                outputs = self.model(inputs)
-                loss = self.loss_function(outputs, labels)
-
-                # Backward pass and optimization
-                loss.backward()
-                self.optimizer.step()
-
-                # Accumulate the loss for monitoring
-                running_loss += loss.item() * inputs.size(0)
-
-                # Print the average loss every batch
-                if (i + 1) % self.batch_size == 0:
-                    batch_loss = running_loss / (self.batch_size * (i + 1))
-                    self.loss = batch_loss
-                    print(
-                        f"Epoch {epoch+1}/{self.epochs}, Batch {i+1}/{len(self.train_loader)}, Loss: {batch_loss}"
-                    )
-
-                self.current_batch += 1
-
-            epoch_loss = running_loss / len(self.train_loader.dataset)
-            self.loss = epoch_loss
-            
-            self.accuracy = self.evaluation.accuracy()
-            print(f"Epoch {epoch+1}/{self.epochs}, Loss: {epoch_loss}")
-
-            if not self.is_training:
-                print("Training stopped by user.")
-                break
-            self.current_epoch += 1
-
-        self.is_training = False
-
-    def start_training(self):
-        print("Starting training...")
-        self.is_training = True
-        self.train()
-
     def stop_training(self):
         self.is_training = False
+        self.model.eval()
 
-    def predict_class(self,data):
+    def reset_training(self):
+        self.is_training = False
+        self.current_batch = 0
+        self.current_epoch = 0
+
+    def predict_class(self, data):
         image = Image.fromarray(np.array(data), mode="L")
-        return self.evaluation.evaluate_digit(image)
+        return self.evaluation.evaluate_digit(image, self.model)
+
+    def current_prog(self):
+        return self.current_epoch + (
+            self.current_batch / (self.dataset_len / self.batch_size)
+        )
+
+    def get_progress(self):
+        return {
+            "message": "current progress",
+            "progress": self.current_prog(),
+            "accuracy": self.accuracy,
+            "loss": self.loss,
+        }
+
+    def batch_step(self, inputs, labels):
+        # Move inputs and labels to the selected device
+        inputs = inputs.to(self.device)
+        labels = labels.to(self.device)
+
+        # Zero the parameter gradients
+        self.optimizer.zero_grad()
+
+        # Forward pass
+        outputs = self.model(inputs)
+        loss = self.loss_function(outputs, labels)
+
+        # Backward pass and optimization
+        loss.backward()
+        self.optimizer.step()
+
+        # Accumulate the loss for monitoring
+        self.running_loss += loss.item() * inputs.size(0)
+        self.current_batch += 1
+        batch_loss = self.running_loss / (self.batch_size * (self.current_batch))
+        self.loss = batch_loss
+
+    def training_in_steps(self):
+        if self.current_epoch == self.epochs:
+            self.stop_training()
+            return self.get_progress()
+        if self.is_training:
+            if not self.model.training:
+                self.model.train()
+            for i in range(20):
+                try:
+                    inputs, labels = next(self.train_iter)
+                    self.batch_step( inputs, labels)
+                except StopIteration:
+                    self.train_iter = iter(self.train_loader)
+                    epoch_loss = self.running_loss / self.dataset_len
+                    self.loss = epoch_loss
+                    self.accuracy = self.evaluation.accuracy(self.model)
+                    print(
+                        f"current epoch {self.current_epoch}, accuracy: {self.accuracy}"
+                    )
+                    break
+            self.accuracy = self.evaluation.accuracy(self.model)
+        return self.get_progress()

@@ -38,9 +38,8 @@ class TrainingObserver(Observer):
         trainingInstance = self.user_trainings[user_id]
         trainingInstance.start_training()
         return {
-            "message": "training resumed/started",
-            "progress": trainingInstance.current_epoch
-            + (trainingInstance.current_batch / trainingInstance.batch_size),
+            "message": "start",
+            "at": trainingInstance.current_prog(),
         }
 
     def stop_training(self, training, user_id, model_id):
@@ -50,35 +49,32 @@ class TrainingObserver(Observer):
         trainingInstance = self.user_trainings[user_id]
         trainingInstance.stop_training()
         return {
-            "message": "training paused",
-            "progress": trainingInstance.current_epoch
-            + (trainingInstance.current_batch / trainingInstance.batch_size),
+            "message": "pause",
+            "at": trainingInstance.current_prog(),
         }
 
     def reset_training(self, training, user_id, model_id):
         """
         Reset training
         """
-        # TODO: reset training logic
+        trainingInstance = self.user_trainings[user_id]
+        trainingInstance.reset_training()
         return True
 
     def get_progress(self, message, user_id, model_id):
         """
         get current progress
         """
-        """ if user_id in self.user_trainings:
+        if user_id in self.user_trainings:
             trainingInstance = self.user_trainings[user_id]
-            return {
-                "message": "current progress",
-                "progress": trainingInstance.current_epoch  + (trainingInstance.current_batch / trainingInstance.batch_size),
-                "accuracy": trainingInstance.accuracy,
-                "loss": trainingInstance.loss,
-            } """
+            if trainingInstance.is_training:
+                return trainingInstance.training_in_steps()
+            return trainingInstance.get_progress()
         return {
             "message": "current progress",
-            "progress": message + 0.1,
-            "accuracy": message + random(),
-            "loss": message - 2 * random(),
+            "progress": 0,
+            "accuracy": 0,
+            "loss": 10,
         }
 
     def update_parameters(self, params, user_id, model_id):
@@ -109,8 +105,7 @@ class TrainingObserver(Observer):
             "message": "parameters changed",
             "new_values": params,
             "old_values": old_values,
-            "at": max(trainingInstance.current_epoch, random() * 9)
-            + (trainingInstance.current_batch / trainingInstance.batch_size),
+            "at": trainingInstance.current_prog(),
         }
 
     def evaluate_digit(self, image, user_id, model_id):

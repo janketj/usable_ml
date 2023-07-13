@@ -17,7 +17,7 @@ def play_bar():
             st.session_state.progress <= st.session_state.epochs
             and st.session_state.is_training
         ):
-            event.Interval(3, get_progress)
+            event.Interval(1, get_progress)
 
         with mui.Box(
             sx={
@@ -88,5 +88,5 @@ def play_bar():
                     },
                 },
             )
-            with mui.Button(onClick=save_model()):
-                mui.icon.Download()
+            """ with mui.Button(onClick=save_model()):
+                mui.icon.Download() """

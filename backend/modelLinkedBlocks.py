@@ -10,8 +10,8 @@ DEFAULT_CONV_BLOCK = {
     "layers": {
         "conv": {
             "in_channels": 1,
-            "out_channels": 64,
-            "kernel_size": 3,
+            "out_channels": 16,
+            "kernel_size": 6,
             "stride": 1,
             "padding": 1,
             "dilation": 1,
@@ -21,7 +21,6 @@ DEFAULT_CONV_BLOCK = {
         "activ": {  # can be None
             "type": "ReLU",
         },
-        "drop": {"p": 0.05, "inplace": True},  # can be None
         "pool": {  # can be None
             "type": "max",
             "params": {
@@ -38,17 +37,15 @@ DEFAULT_CONV_BLOCK = {
 DEFAULT_FC_BLOCK = {
     "type": "FCBlock",
     "name": "Block_1fc",
-    "previous": 0,
+    "previous": "Con_2",
     "layers": {
         "linear": {
-            "in_features": 28,
             "out_features": 10,
             "bias": True,
         },
         "activ": {
             "type": "ReLU",
         },
-        "drop": {"p": 0.05, "inplace": True},
     },
 }
 
@@ -57,24 +54,38 @@ class BlockList(list):
     def to_list(self):
         return [item.getInfo() for item in self]
 
+    def to_layers(self):
+        conv_layers = []
+        linear_layers = []
+        for block in self:
+            if isinstance(block, ConvBlock):
+                conv_layers += block.to_layer_list()
+            else:
+                linear_layers += block.to_layer_list()
+        return nn.Sequential(*conv_layers), nn.Sequential(*linear_layers)
+
 
 class Model(nn.Module):
     def __init__(self, name):
         super(Model, self).__init__()
 
-        self.id = name #str(uuid.uuid4())
+        self.id = name  # str(uuid.uuid4())
 
         self.name = name
-        self.head = None
         self.blockList = BlockList()
         self.createBlock(DEFAULT_CONV_BLOCK)
         self.createBlock(DEFAULT_FC_BLOCK)
+        self.conv_layers, self.linear_layers = self.blockList.to_layers()
 
     def to_dict(self):
         return dict(name=self.name, id=self.id, blocks=self.blockList.to_list())
 
     def addBlock(self, block):
-        self.blockList.append(block)
+        if block.previous:
+            prevIndex = self.findBlockIndex(block.previous)
+            self.blockList.insert(prevIndex + 1, block)
+        else:
+            self.blockList.append(block)
 
     def assignHead(self, block):
         self.head = block
@@ -82,30 +93,44 @@ class Model(nn.Module):
     def getBlockList(self):
         return self.blockList
 
-    def findBlockById(self, id):
+    def findBlockById(self, id, name=None):
+        if name is not None:
+            for block in self.blockList:
+                if block.name == name:
+                    return block
         for block in self.blockList:
-            if block.getId() == id:
+            if block.getId() == id or block.name == id:
                 return block
 
-        print("Wrong Id")
+        print("Wrong Id", id, name)
         return None
 
+    def findBlockIndex(self, id, name=None):
+        if name is not None:
+            for index, block in enumerate(self.blockList):
+                if block.name == name:
+                    return index
+        for index, block in enumerate(self.blockList):
+            if block.id == id:
+                return index
+        return 0
+
     def createBlock(self, blockInfo):
+        previousBlock = None
         if blockInfo["previous"] is not None:
-            previous = self.findBlockById(id=blockInfo["previous"])
-        else:
-            previous = None
+            previousBlock = self.findBlockById(
+                id=blockInfo["previous"], name=blockInfo["previous"]
+            )
 
         if blockInfo["type"] == "ConvBlock":
             block = self.createConvBlock(
-                blockInfo["name"], previous, blockInfo["layers"]
+                blockInfo["name"], previousBlock, blockInfo["layers"]
             )
 
         if blockInfo["type"] == "FCBlock":
-            block = self.createFCBlock(blockInfo["name"], previous, blockInfo["layers"])
-
-        if previous is None:
-            self.assignHead(block)
+            block = self.createFCBlock(
+                blockInfo["name"], previousBlock, blockInfo["layers"]
+            )
 
         self.addBlock(block)
 
@@ -144,9 +169,9 @@ class Model(nn.Module):
 
         return fcBlock
 
-    def changeBlockParameters(self, dict):
-        info = dict["info"]
-        block = self.findBlockById(dict["id"])
+    def changeBlockParameters(self, params):
+        info = params["info"]
+        block = self.findBlockById(params["id"], params["name"])
 
         if info["name"] is not None:
             block.changeName(info["name"])
@@ -183,22 +208,19 @@ class Model(nn.Module):
                 block.unfreezeLayer(type)
 
     def deleteBlock(self, dict):
-        block = self.findBlockById(dict["id"])
+        block = self.findBlockById(dict["id"], dict["name"])
+        block_index = self.findBlockIndex(dict["id"], dict["name"])
+        if block.previous is not None:
+            previous_block = self.findBlockById(block.previous, block.previous)
+            previous_block.next = block.next
+        if block.next is not None:
+            next_block = self.findBlockById(block.next, block.next)
+            next_block.previous = block.previous
 
-        if block.previous is None:
-            if block.next is None:
-                self.assignHead(None)
-
-            self.assignHead(block.next)
-            block.next.assignPrevious(None)
-        elif block.next is None:
-            block.previous.assignNext(None)
-
-        else:
-            block.next.assignPrevious(block.previous)
-
-        self.blockList.remove(block)
+        self.blockList.pop(block_index)
 
     def forward(self, x):
-        x = self.head.forward(x)
+        x = self.conv_layers(x)
+        x = x.view(x.size(0), -1)
+        x = self.linear_layers(x)
         return x

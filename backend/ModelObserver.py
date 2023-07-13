@@ -37,7 +37,7 @@ class ModelObserver(Observer):
         """
         Save a model to a file
         """
-        save_model(self.user_models[user_id][model_id], name)
+        save_model(self.user_models[user_id][model_id])
         return self.return_model_info(user_id, model_id)
 
     def create_model(self, name, user_id, model_id):

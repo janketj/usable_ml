@@ -67,7 +67,8 @@ class Controller(Observable):
         @sio.on('*')
         def catch_all(messageType, sid, data):
             ''' Put in queue'''
-            print(f"BACKEND: Received {messageType}")
+            if messageType != "get_progress":
+                print(f"BACKEND: Received {messageType}")
             user_id = data['user_id']
             model_id = data['model_id']
             content = data["content"]
@@ -109,6 +110,7 @@ class Controller(Observable):
 
         for observer in currentObservers:
             res = observer.update(messageType, message, user_id, model_id)
-            print(f"Result: {res}")
+            if messageType != "get_progress":
+                print(f"Result: {res}")
             emit_function(messageType, res, room=sid)
 

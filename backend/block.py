@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 import uuid
+from typing import Tuple
 
 
 class Block(nn.Module):
@@ -14,10 +15,8 @@ class Block(nn.Module):
 
         self.next = None
 
-        if previous is not None:
-            self.assignPrevious(previous)
-        else:
-            self.previous = None
+        self.previous = None
+        self.previous_output_dim = (28, 28, 1)
 
         self.norm = None
         self.activ = None
@@ -241,10 +240,10 @@ class ConvBlock(Block):
         self.poolParamas = None
 
         self.outputDim = None
-
-        # dummy params
-        params = {"in_channels": None, "out_channels": 3, "kernel_size": (3, 3)}
-        self.createConv(params)
+        if previous is not None:
+            self.previous = previous.id
+            if isinstance(self.previous_output_dim, Tuple): 
+                self.previous_output_dim = previous.outputDim
 
     def getLayers(self):
         layers = {
@@ -289,10 +288,8 @@ class ConvBlock(Block):
         # groups: This controls the connections between input and output channels. By default, it is set to 1, which means each input channel is connected to each output channel. For grouped convolution, you can set the groups parameter to a specific value.
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
-        if self.previous is not None:
-            params["in_channels"] = self.previous.outputDim
-        else:
-            params["in_channels"] = 1
+        if params["in_channels"] is None:
+            params["in_channels"] = 4
 
         if self.conv is None:
             self.conv = nn.Conv2d(**params)
@@ -395,8 +392,8 @@ class ConvBlock(Block):
 
     def mutateOutputDim(self):
         # Input dimensions
-        if self.previous is not None:
-            inputWidth, inputHeight, _ = self.previous.outputDim
+        if self.previous_output_dim is not None:
+            inputWidth, inputHeight, _ = self.previous_output_dim
         else:
             inputWidth, inputHeight, _ = (28, 28, 1)
 
@@ -426,6 +423,21 @@ class ConvBlock(Block):
 
         self.outputDim = (outWidth, outHeight, outChannels)
 
+    def to_layer_list(self):
+        layers = []
+        if self.conv is not None:
+            layers.append(self.conv)
+            if self.norm is not None:
+                layers.append(self.norm)
+            if self.activ is not None:
+                layers.append(self.activ)
+            if self.drop is not None:
+                layers.append(self.drop)
+            if self.pool is not None:
+                layers.append(self.pool)
+
+        return layers
+
     def forward(self, x):
         if self.conv is not None:
             x = self.conv(x)
@@ -442,9 +454,6 @@ class ConvBlock(Block):
             if self.pool is not None:
                 x = self.pool(x)
 
-        if self.next is not None:
-            x = self.next(x)
-
         return x
 
 
@@ -459,10 +468,11 @@ class FCBlock(Block):
         self.outputDim = None
 
         self.linearParams = None
-
-        # dummy params
-        params = {"in_features": 10, "out_features": 10}
-        self.createLinear(params)
+        if previous is not None:
+            self.previous = previous.id
+            self.previous_output_dim = previous.outputDim
+        else:
+            self.previous_output_dim = 1
 
     def getLayers(self):
         layers = {
@@ -492,16 +502,16 @@ class FCBlock(Block):
         # in_features: Data type: int. Specifies the size of each input sample. It represents the number of input features.
         # out_features: Data type: int. Specifies the size of each output sample. It represents the number of output features.
         # bias: Data type: bool, optional. Specifies whether to include a bias term in the linear transformation. Default is True. If set to False, the layer will not learn an additive bias.
-    
-        if self.previous is not None:
-            if isinstance(self.previous, ConvBlock):
+
+        if self.previous_output_dim is not None:
+            if isinstance(self.previous_output_dim, Tuple):
                 params["in_features"] = (
-                    self.previous.outputDim[0]
-                    * self.previous.outputDim[1]
-                    * self.previous.outputDim[2]
+                    self.previous_output_dim[0]
+                    * self.previous_output_dim[1]
+                    * self.previous_output_dim[2]
                 )
-            elif isinstance(self.previous, FCBlock):
-                params["in_features"] = self.previous.outputDim
+            elif isinstance(self.previous_output_dim, int):
+                params["in_features"] = self.previous_output_dim
 
         if self.linear is None:
             if self.next is None:
@@ -533,9 +543,21 @@ class FCBlock(Block):
 
         self.outputDim = output
 
+    def to_layer_list(self):
+        layers = []
+        if self.linear is not None:
+            layers.append(self.linear)
+            if self.norm is not None:
+                layers.append(self.norm)
+            if self.activ is not None:
+                layers.append(self.activ)
+            if self.drop is not None:
+                layers.append(self.drop)
+
+        return layers
+
     def forward(self, x):
         if self.linear is not None:
-            x = x.view(x.size(0), -1)
             x = self.linear(x)
 
             if self.norm is not None:

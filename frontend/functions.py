@@ -10,11 +10,12 @@ sio.connect("http://localhost:6000")
 
 @sio.on("*")
 def catch_all(messageType, data=None):
+    if messageType == "get_progress":
+        update_progress(data)
+        return
     print(f"FRONTEND: Received {messageType} with data {data}")
     if messageType == "update_params":
         add_training_event(data)
-    if messageType == "get_progress":
-        update_progress(data)
     if messageType == "init_user":
         dump_state("existing_models", data["existing_models"])
         dump_state("model", data["defaultModel"])
@@ -22,15 +23,15 @@ def catch_all(messageType, data=None):
         update_existing_models(data["model_id"], data["name"])
         update_model(data)
     if messageType == "start_training":
-        update_existing_models(data["model_id"], data["name"])
-        update_model(data)
+        add_training_event(data)
+    if messageType == "stop_training":
+        add_training_event(data)
     if messageType == "evaluate_digit":
         print(data)
 
 
 def add_training_event(data):
     training_events = get_state("training_events")
-
     t_event = {
         "value": data["at"],
         "label": data["message"],
@@ -63,16 +64,17 @@ def init_user():
 
 
 def send(msg, receiver: str = "tcp://localhost:5555"):
-    print("Connecting to server…")
-    print("Sending message %s …" % msg)
     messageType = msg["messageType"]
+    if messageType != "get_progress":
+        print("Sending message %s …" % msg)
     sio.emit(messageType, msg)
 
 
 def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
     model_id = st.session_state.model_id
-    print(f"Sending message {messageType} to {user_id}")
+    if messageType != "get_progress":
+        print(f"Sending message {messageType} to {user_id}")
     send(
         dict(
             messageType=messageType,

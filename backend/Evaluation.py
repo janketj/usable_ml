@@ -8,41 +8,40 @@ from zennit.attribution import Gradient
 
 
 class Evaluation:
-    def __init__(self, model, data_loader, loss_function):
+    def __init__(self, data_loader, loss_function):
         """Expecting the trained model here as well as the test dataloader
         and the current training instance (to get the used loss function and
         other parameters possibly)."""
-        self.model = model
         self.loss_function = loss_function
         self.data_loader = data_loader
         self.canonizers = [SequentialMergeBatchNorm()]
         self.composite = EpsilonGammaBox(low=-3.0, high=3.0, canonizers=self.canonizers)
 
-    def evaluate_digit(self, image):
+    def evaluate_digit(self, image, model):
         """this is probably not working yet, but at least I got started on it
         LRP is an importance visualization method, showing which pixels spoke
         for and against the prediction. this is supposed to return the
         prediction as well as the heatmap image if everything went right."""
-        with Gradient(model=self.model, composite=self.composite) as attributor:
+        with Gradient(model=model, composite=self.composite) as attributor:
             out, relevance = attributor(image, torch.eye(1000)[[0]])
             return out, relevance
 
-    def accuracy(self):
-        self.model.eval()
+    def accuracy(self, model):
+        model.eval()
         correct = 0
         with torch.no_grad():
             for data, target in self.data_loader:
                 data, target = Variable(data), Variable(target)
-                output = self.model(data)
+                output = model(data)
                 pred = output.data.max(1, keepdim=True)[1]
                 correct += pred.eq(target.data.view_as(pred)).cpu().sum().item()
         return 100.0 * correct / len(self.data_loader.dataset)
 
-    def evaluate_testset(self):
+    def evaluate_testset(self, model):
         """this should be working, just copy pasted from the evaluate file in
         the given project. It calculates accuracy, loss and accuracy per class
         for the validation dataset."""
-        self.model.eval()
+        model.eval()
         losses = []
         correct = 0
         n_classes = len(np.unique(self.data_loader.dataset.targets))
@@ -51,7 +50,7 @@ class Evaluation:
         with torch.no_grad():
             for data, target in self.data_loader:
                 data, target = Variable(data), Variable(target)
-                output = self.model(data)
+                output = model(data)
                 losses.append(self.loss_function(output, target).item())
                 pred = output.data.max(1, keepdim=True)[1]
                 correct += pred.eq(target.data.view_as(pred)).cpu().sum().item()
