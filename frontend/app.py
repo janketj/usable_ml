@@ -57,7 +57,7 @@ if "batch_size" not in st.session_state:
 if "epochs" not in st.session_state:
     st.session_state.epochs = 10
     st.session_state.epochs_validated = 10
-    
+
 if "optimizer" not in st.session_state:
     st.session_state.optimizer = {
         "props": {"value": "SGD", "children": "Stochastic Gradient Descent"}
@@ -104,9 +104,8 @@ st.session_state.existing_models = get_state("existing_models")
 
 
 # train_tab, model_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])
-
+st.header("Learning to read Handwritten Digits")
 menu_bar()
-
 if st.session_state.tab == "train":
     with elements("train_tab"):
         train_page()

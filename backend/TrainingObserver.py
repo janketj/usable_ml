@@ -23,12 +23,13 @@ class TrainingObserver(Observer):
             MessageType.UPDATE_PARAMS: self.update_parameters,
             MessageType.GET_PROGRESS: self.get_progress,
             MessageType.INIT_USER: self.init_user,
+            MessageType.EVALUATE_DIGIT: self.evaluate_digit,
         }
         func = switcher.get(messageType, lambda: "Invalid message type")
         return func(message, user_id, model_id)
 
     def init_user(self, message, user_id, model_id):
-        self.user_trainings[user_id] = Training(self.user_models[user_id]['default'])
+        self.user_trainings[user_id] = Training(self.user_models[user_id]["default"])
 
     def start_training(self, training, user_id, model_id):
         """
@@ -65,14 +66,14 @@ class TrainingObserver(Observer):
         """
         get current progress
         """
-        if user_id in self.user_trainings:
+        """ if user_id in self.user_trainings:
             trainingInstance = self.user_trainings[user_id]
             return {
                 "message": "current progress",
                 "progress": trainingInstance.current_epoch  + (trainingInstance.current_batch / trainingInstance.batch_size),
                 "accuracy": trainingInstance.accuracy,
                 "loss": trainingInstance.loss,
-            }
+            } """
         return {
             "message": "current progress",
             "progress": message + 0.1,
@@ -86,14 +87,14 @@ class TrainingObserver(Observer):
         """
         old_values = {}
         trainingInstance = self.user_trainings[user_id]
-        if params["loss_function"] != trainingInstance.loss_function:
-            old_values["loss_function"] = trainingInstance.loss_function
+        if params["loss_function"] != trainingInstance.loss_function_name:
+            old_values["loss_function"] = trainingInstance.loss_function_name
             trainingInstance.update_loss_function(params["loss_function"])
         if params["use_cuda"] != trainingInstance.use_cuda:
             old_values["use_cuda"] = trainingInstance.use_cuda
             trainingInstance.update_use_cuda(params["use_cuda"])
-        if params["optimizer"] != trainingInstance.optimizer:
-            old_values["optimizer"] = trainingInstance.optimizer
+        if params["optimizer"] != trainingInstance.optimizer_name:
+            old_values["optimizer"] = trainingInstance.optimizer_name
             trainingInstance.update_optimizer(params["optimizer"])
         if params["epochs"] != trainingInstance.epochs:
             old_values["epochs"] = trainingInstance.epochs
@@ -108,6 +109,10 @@ class TrainingObserver(Observer):
             "message": "parameters changed",
             "new_values": params,
             "old_values": old_values,
-            "at": trainingInstance.current_epoch
+            "at": max(trainingInstance.current_epoch, random() * 9)
             + (trainingInstance.current_batch / trainingInstance.batch_size),
         }
+
+    def evaluate_digit(self, image, user_id, model_id):
+        print("evaluating digit", self.user_trainings[user_id].predict_class(image))
+        return {"prediction": round(random() * 10), "heatmap": image}

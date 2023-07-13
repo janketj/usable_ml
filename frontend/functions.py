@@ -24,6 +24,8 @@ def catch_all(messageType, data=None):
     if messageType == "start_training":
         update_existing_models(data["model_id"], data["name"])
         update_model(data)
+    if messageType == "evaluate_digit":
+        print(data)
 
 
 def add_training_event(data):
@@ -101,6 +103,7 @@ def reset_training():
     st.session_state.vis_data = {"accuracy": [], "loss": []}
     dump_state("progress", st.session_state.progress)
     dump_state("vis_data", st.session_state.vis_data)
+    dump_state("training_events", [])
     send_message(MessageType.RESET_TRAINING)
 
 
@@ -158,3 +161,7 @@ def update_params():
     }
     st.session_state.epochs_validated = st.session_state.epochs
     send_message(MessageType.UPDATE_PARAMS, values)
+
+
+def predict_class(image):
+    send_message(MessageType.EVALUATE_DIGIT, image)

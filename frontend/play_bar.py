@@ -54,7 +54,7 @@ def play_bar():
                     "& .MuiSlider-thumb": {
                         "height": 20,
                         "width": 10,
-                        "backgroundColor": COLORS["bg-red"],
+                        "backgroundColor": COLORS["secondary"],
                         "borderRadius": 0,
                         "&:focus, &:hover, &.Mui-active, &.Mui-focusVisible": {
                             "boxShadow": "inherit",
@@ -66,12 +66,12 @@ def play_bar():
                     "& .MuiSlider-rail": {
                         "opacity": 0.3,
                         "borderRadius": 0,
-                        "backgroundColor": COLORS["red"],
+                        "backgroundColor": COLORS["primary"],
                     },
                     "& .MuiSlider-track": {
                         "border": "none",
                         "borderRadius": 0,
-                        "backgroundColor": COLORS["red"],
+                        "backgroundColor": COLORS["primary"],
                         "height": "18px",
                     },
                     "& .MuiSlider-valueLabel": {
@@ -84,13 +84,10 @@ def play_bar():
                         "color": "white",
                     },
                     "& .MuiSlider-mark": {
-                        "backgroundColor": "#bfbfbf",
-                        "height": 8,
-                        "width": 1,
-                        "&.MuiSlider-markActive": {
-                            "opacity": 1,
-                            "backgroundColor": "currentColor",
-                        },
+                        "backgroundColor": "#fff",
+                        "height": 20,
+                        "width": 2,
+                        "border": f'3px solid {COLORS["red"]}',
                     },
                 },
             )

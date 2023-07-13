@@ -6,7 +6,9 @@ from constants import COLORS
 
 def menu_bar():
     with elements("menu_bar"):
-        with mui.Box(sx={"width": "100%", "display": "flex"},):
+        with mui.Box(
+            sx={"width": "100%", "display": "flex", "height": "40px", "m": 0, "p": 0},
+        ):
             with mui.ToggleButtonGroup(
                 variant="outlined",
                 color="primary",
@@ -20,5 +22,3 @@ def menu_bar():
                 mui.ToggleButton("Model", value="model", sx={"width": 400})
                 mui.ToggleButton("Evaluation", value="eval", sx={"width": 400})
             model_loader()
-
-            

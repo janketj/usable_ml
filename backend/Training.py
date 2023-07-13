@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.optim import Optimizer, SGD, Adam
 from data import get_data_loaders
+from PIL import Image
 from Evaluation import Evaluation
 
 
@@ -13,6 +14,8 @@ class Training:
             self.model.parameters(), lr=self.learning_rate, momentum=0.5
         )
         self.loss_function = nn.CrossEntropyLoss()
+        self.optimizer_name = "SGD"
+        self.loss_function_name = "cross_entropy"
         self.batch_size = 256
         self.epochs = 10
         self.use_cuda = False
@@ -24,6 +27,7 @@ class Training:
         self.accuracy = 0
         self.train_loader = get_data_loaders(batch_size=self.batch_size, test=False)
         self.test_loader = get_data_loaders(batch_size=self.batch_size, test=True)
+        self.evaluation = Evaluation(self.model, self.test_loader, self.loss_function)
 
     def update_optimizer(self, optimizer):
         if optimizer == "SGD":
@@ -32,6 +36,7 @@ class Training:
             )
         elif optimizer == "Adam":
             self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate)
+        self.optimizer_name = optimizer
 
     def update_loss_function(self, loss_function):
         if loss_function == "cross_entropy":
@@ -40,6 +45,7 @@ class Training:
             self.loss_function = nn.MSELoss()
         elif loss_function == "neg_log_lik":
             self.loss_function = nn.NLLLoss()
+        self.loss_function_name = loss_function
 
     def update_batch_size(self, batch_size):
         self.batch_size = batch_size
@@ -112,8 +118,8 @@ class Training:
 
             epoch_loss = running_loss / len(self.train_loader.dataset)
             self.loss = epoch_loss
-            evaluation = Evaluation(self.model, self.test_loader, self.loss_function)
-            self.accuracy = evaluation.accuracy()
+            
+            self.accuracy = self.evaluation.accuracy()
             print(f"Epoch {epoch+1}/{self.epochs}, Loss: {epoch_loss}")
 
             if not self.is_training:
@@ -130,3 +136,7 @@ class Training:
 
     def stop_training(self):
         self.is_training = False
+
+    def predict_class(self,data):
+        image = Image.fromarray(data.numpy(), mode="L")
+        return self.evaluation.evaluate_digit(image)

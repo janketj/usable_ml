@@ -48,7 +48,8 @@ def train_page():
                     "Batch Size",
                     "batch_size",
                     type="slider",
-                    sliderRange=[5, 500],
+                    sliderRange=[4, 512],
+                    step=4,
                     subtitle="How many samples to use for each step",
                     tooltip="For each epoch the neural network trains on all training samples once. To introduce a little bit \
                         of randomness to this process, the samples are fed to it in batches. So if the batch size is 64, \
@@ -79,7 +80,7 @@ def train_page():
                     "learning_rate",
                     type="slider",
                     sliderRange=[0.01, 1],
-                    step=0.01,
+                    step=0.02,
                     subtitle="How much of the current batch should be remembered",
                     tooltip="In each iteration of a neural network the weights or all neurons in all hidden layers are updated in the direction, \
                         which decreases the prediction error by the optimizer. If the learning rate is low, the weights of the neural network \
