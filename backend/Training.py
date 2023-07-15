@@ -86,14 +86,11 @@ class Training:
     def predict_class(self, data):
         self.model.eval()
         with torch.no_grad():
-            trans = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
-            image = Image.fromarray(np.array(data), mode="L")
-            image = trans(image)
-            sample = image.view(1,1,28,28)
-            res = self.model(sample)
-            res = res.data.max(dim=1)[1].cpu().detach().numpy().astype(np.int64)
-            print("in training:",res, np.average(np.array(data)))
-            return int(res)
+            raw_image = np.array(data, dtype = np.float32)
+            image = torch.reshape(torch.from_numpy(raw_image), (1, 1, 28, 28))
+            res = self.model(image)
+            print("in training:",res, res.argmax(dim=1))
+            return int(res.argmax(dim=1))
 
     def current_prog(self):
         return self.current_epoch + (
