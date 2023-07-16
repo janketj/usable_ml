@@ -19,22 +19,15 @@ def block_layers(block_type):
     )
 
     if block_type == "FCBlock":
-        fc_col1, fc_col2, fc_col3 = st.columns(3)
+        fc_col1 = st.columns(3)
         with fc_col1:
             st.checkbox(
                 "Bias",
                 vals["linear_bias"],
                 key="linear_bias",
-                help="A Boolean value. Default is True",
-            )
-        with fc_col2:
-            st.slider(
-                "Number of Input features",
-                8,
-                256,
-                vals["linear_in_features"],
-                4,
-                key="linear_in_features",
+                help="Should the layer use a bias? (Default is true) \
+                        \
+                        The bias is used by the model to offset the result. It helps to shift the activation function towards the positive or negative side.".replace("  ",""),
             )
 
     if block_type == "ConvBlock":
@@ -47,7 +40,9 @@ def block_layers(block_type):
                 vals["conv_padding"],
                 1,
                 key="conv_padding",
-                help="0 (No padding) or A positive integer value p or A tuple (pH, pW)",
+                help="Use 0 to disable padding. For equal padding in height and width provide a single positive integer. Alternatively, you can provide your own tuple (height, width) with positive integers for both height and width. \
+                        \
+                        In order to assist the kernel with processing the image, padding is added to the frame of the image to allow for more space for the kernel to cover the image. Adding padding to an image processed by a convolutional model allows for more accurate analysis of images.".replace("  ",""),
             )
             st.number_input(
                 "Kernel Size",
@@ -56,7 +51,9 @@ def block_layers(block_type):
                 vals["conv_kernel_size"],
                 1,
                 key="conv_kernel_size",
-                help="A positive integer value k or  A tuple (kH, kW)",
+                help="For a square kernel provide a single positive integer. Alternatively, you can provide your own tuple (height, width) with positive integers for both height and width. \
+                        \
+                        The kernel is a filter that is used to extract the features from the images. It is moved over the input data step-by-step and performs calculations with the sub-region of the image.".replace("  ",""),
             )
         with Conv_col2:
             st.number_input(
@@ -66,7 +63,9 @@ def block_layers(block_type):
                 vals["conv_stride"],
                 1,
                 key="conv_stride",
-                help="A positive integer value s or  A tuple (sH, sW)",
+                help="For equal stride in height and width provide a single positive integer. Alternatively, you can provide your own tuple (height, width) with positive integers for both height and width. \
+                        \
+                        The stride defines how big the horizontal and vertical steps of the kernel are.".replace("  ",""),
             )
             st.number_input(
                 "Dilation",
@@ -75,51 +74,23 @@ def block_layers(block_type):
                 vals["conv_dilation"],
                 1,
                 key="conv_dilation",
-                help="A positive integer value d or  A tuple (dH, dW)",
+                help="Use 0 to disable dilation. For equal dilation in height and width provide a single positive integer. Alternatively, you can provide your own tuple (height, width) with positive integers for both height and width. \
+                        \
+                        The dilation defines how many pixels should be skipped for the kernel. Given a dilation of 1 and a kernel size of 3 the model will look at 5x5 sub-regions of the image. This allows the model to look at bigger regions without increasing computational cost".replace("  ",""),
             )
         with Conv_col3:
             st.checkbox(
                 "Bias",
                 vals["conv_bias"],
                 key="conv_bias",
-                help="A Boolean value. Default is True",
+                help="Should the layer use a bias? (Default is true) \
+                        \
+                        The bias is used by the model to offset the result. It helps to shift the activation function towards the positive or negative side.".replace("  ",""),
             )
 
     use_norm_layer = st.checkbox(
         "normalization", vals["use_norm_layer"], "use_norm_layer"
     )
-    if use_norm_layer:
-        norm_col1, norm_col2, norm_col3 = st.columns(3)
-        with norm_col1:
-            st.number_input(
-                "Number of Features",
-                1,
-                64,
-                vals["norm_num_features"],
-                1,
-                key="norm_num_features",
-                help="A positive integer value",
-            )
-        with norm_col2:
-            st.number_input(
-                "Output Features",
-                1,
-                64,
-                vals["norm_out_features"],
-                1,
-                key="norm_out_features",
-                help="A positive integer value",
-            )
-        with norm_col3:
-            st.number_input(
-                "Momentum",
-                0.0,
-                1.0,
-                vals["norm_momentum"],
-                0.05,
-                key="norm_momentum",
-                help="A floating-point value between 0 and 1, typically around 0.1",
-            )
 
     st.selectbox(
         "Activation Function",
@@ -139,14 +110,9 @@ def block_layers(block_type):
                 vals["drop_p"],
                 0.05,
                 key="drop_p",
-                help="The probability of an element to be zeroed. It must be a value between 0 and 1, typically around 0.5.",
-            )
-        with Drop_col2:
-            st.checkbox(
-                "In Place",
-                vals["drop_inplace"],
-                key="drop_inplace",
-                help="If set to True, the operation is performed in-place, i.e., it modifies the input tensor.",
+                help="A value between 0 and 1 that represents the probability that a value is set to zero. Typically this is set close to 0.5 \
+                        \
+                        This helps the model to generalize as it can't exploit sub-optimal training data that has identifying features between classes by pure chance (e.g. all images where the 24th pixel is black are handwritten fives).".replace("  ",""),
             )
 
     use_pool_layer = st.checkbox(
@@ -168,7 +134,9 @@ def block_layers(block_type):
                 vals["pool_stride"],
                 1,
                 key="pool_stride",
-                help="A positive integer value s or  A tuple (sH, sW)",
+                help="For equal stride in height and width provide a single positive integer. Alternatively, you can provide your own tuple (height, width) with positive integers for both height and width. \
+                        \
+                        The stride defines how big the horizontal and vertical steps of the kernel are.".replace("  ",""),
             )
         with Pool_col2:
             st.number_input(
@@ -178,7 +146,9 @@ def block_layers(block_type):
                 vals["pool_padding"],
                 1,
                 key="pool_padding",
-                help="0 (No padding) or A positive integer value p or A tuple (pH, pW)",
+                help="Use 0 to disable padding. For equal padding in height and width provide a single positive integer. Alternatively, you can provide your own tuple (height, width) with positive integers for both height and width. \
+                        \
+                        In order to assist the kernel with processing the image, padding is added to the frame of the image to allow for more space for the kernel to cover the image. Adding padding to an image processed by a convolutional model allows for more accurate analysis of images.".replace("  ",""),
             )
             st.number_input(
                 "Kernel Size",
@@ -186,8 +156,9 @@ def block_layers(block_type):
                 28,
                 vals["pool_kernel_size"],
                 1,
-                key="pool_kernel_size",
-                help="A positive integer value k or  A tuple (kH, kW)",
+                key="pool_kernel_size",help="For a square kernel provide a single positive integer. Alternatively, you can provide your own tuple (height, width) with positive integers for both height and width. \
+                        \
+                        The kernel is a filter that is used to extract the features from the images. It is moved over the input data step-by-step and performs calculations with the sub-region of the image.".replace("  ",""),
             )
 
 
@@ -224,14 +195,9 @@ def block_form(index):
             if block_type == "FCBlock":
                 new_block["layers"]["linear"] = {
                     "bias": st.session_state.linear_bias,
-                    "in_features": st.session_state.linear_in_features,
                 }
             if st.session_state.use_norm_layer:
-                new_block["layers"]["norm"] = {
-                    "num_features": st.session_state.norm_num_features,
-                    "out_features": st.session_state.norm_out_features,
-                    "momentum": st.session_state.norm_momentum,
-                }
+                new_block["layers"]["norm"] = {}
             if st.session_state.activ_type != "None":
                 new_block["layers"]["activ"] = {
                     "type": st.session_state.activ_type,
@@ -239,7 +205,6 @@ def block_form(index):
             if st.session_state.use_drop_layer:
                 new_block["layers"]["drop"] = {
                     "p": st.session_state.drop_p,
-                    "inplace": st.session_state.drop_inplace,
                 }
             if st.session_state.use_pool_layer:
                 new_block["layers"]["pool"] = {
