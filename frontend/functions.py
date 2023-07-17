@@ -168,7 +168,7 @@ def create_model():
 
 
 def load_model():
-    model_id = st.session_state.existing_models[st.session_state.loaded_model]
+    model_id = st.session_state.loaded_model
     st.session_state.tab = "model"
     send_message(MessageType.LOAD_MODEL, model_id)
 
