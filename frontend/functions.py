@@ -7,6 +7,17 @@ from session_state_dumper import dump_state, get_state
 sio = socketio.Client()
 sio.connect("http://localhost:6000")
 
+model_messages = [
+    MessageType.LOAD_MODEL,
+    MessageType.SAVE_MODEL,
+    MessageType.ADD_BLOCK,
+    MessageType.EDIT_BLOCK,
+    MessageType.REMOVE_BLOCK,
+    MessageType.REMOVE_BLOCK_LAYER,
+    MessageType.FREEZE_BLOCK_LAYER,
+    MessageType.UNFREEZE_BLOCK_LAYER,
+]
+
 
 @sio.on("*")
 def catch_all(messageType, data=None):
@@ -20,7 +31,8 @@ def catch_all(messageType, data=None):
         dump_state("existing_models", data["existing_models"])
         dump_state("model", data["defaultModel"])
     if messageType == "create_model":
-        update_existing_models(data["model_id"], data["name"])
+        print(data)
+        update_existing_models(data["id"], data["name"])
         update_model(data)
     if messageType == "start_training":
         add_training_event(data)
@@ -29,6 +41,8 @@ def catch_all(messageType, data=None):
     if messageType == "evaluate_digit":
         print(data["prediction"])
         dump_state("prediction", data)
+    if messageType in model_messages:
+        update_model(data)
 
 
 def add_training_event(data):
@@ -105,8 +119,10 @@ def reset_training():
     dump_state("training_events", [])
     send_message(MessageType.RESET_TRAINING)
 
+
 def save_model():
     send_message(MessageType.SAVE_MODEL)
+
 
 def skip_forward():
     if "progress" not in st.session_state:
@@ -126,12 +142,20 @@ def add_block(params):
     send_message(MessageType.ADD_BLOCK, params)
 
 
-def remove_block(block_id):
-    send_message(MessageType.REMOVE_BLOCK, block_id)
+def remove_block(params):
+    send_message(MessageType.REMOVE_BLOCK, params)
 
 
 def edit_block(params):
     send_message(MessageType.EDIT_BLOCK, params)
+
+
+def freeze_block(params):
+    send_message(MessageType.FREEZE_BLOCK_LAYER, params)
+
+
+def unfreeze_block(params):
+    send_message(MessageType.UNFREEZE_BLOCK_LAYER, params)
 
 
 def create_model():
@@ -140,7 +164,7 @@ def create_model():
 
 
 def load_model():
-    model_id = st.session_state.loaded_model
+    model_id = st.session_state.existing_models[st.session_state.loaded_model]
     st.session_state.tab = "model"
     send_message(MessageType.LOAD_MODEL, model_id)
 
@@ -150,11 +174,13 @@ def get_progress():
     st.session_state.vis_data = get_state("vis_data")
     send_message(MessageType.GET_PROGRESS, st.session_state.progress)
 
+
 def update():
     st.session_state.training_events = get_state("training_events")
     st.session_state.model = get_state("model")
     st.session_state.existing_models = get_state("existing_models")
     st.session_state.prediction = get_state("prediction")
+
 
 def update_params():
     values = {

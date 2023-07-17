@@ -44,8 +44,10 @@ class ModelObserver(Observer):
         """
         Create a model
         """
-        self.user_models[user_id][model_id] = create_model(name)
-        return self.return_model_info(user_id, model_id)
+        new_model = create_model(name)
+
+        self.user_models[user_id][new_model.id] = new_model
+        return self.return_model_info(user_id, new_model.id)
 
     def add_block(self, block, user_id, model_id):
         """

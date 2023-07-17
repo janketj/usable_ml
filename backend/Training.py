@@ -8,8 +8,6 @@ from PIL import Image
 from Evaluation import Evaluation
 import numpy as np
 from modelLinkedBlocks import Model
-from ml_utils.model import ConvolutionalNeuralNetwork
-import collections
 
 
 class Training:
@@ -110,7 +108,7 @@ class Training:
             self.stop_training()
             return self.get_progress()
         if self.is_training:
-            for i in range(20):
+            for i in range(10):
                 try:
                     inputs, labels = next(self.train_iter)
                     inputs = inputs.to(self.device)
@@ -137,6 +135,7 @@ class Training:
                     accuracy = self.evaluation.accuracy(self.model)
                     if not self.model.training:
                         self.model.train()
+                    self.current_batch = 0
                     self.current_epoch = self.current_epoch + 1
                     break
             self.accuracy = self.evaluation.accuracy(self.model)

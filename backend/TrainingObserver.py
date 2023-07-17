@@ -24,6 +24,8 @@ class TrainingObserver(Observer):
             MessageType.GET_PROGRESS: self.get_progress,
             MessageType.INIT_USER: self.init_user,
             MessageType.EVALUATE_DIGIT: self.evaluate_digit,
+            MessageType.CREATE_MODEL: self.init_user,
+            MessageType.LOAD_MODEL: self.init_user,
         }
         func = switcher.get(messageType, lambda: "Invalid message type")
         return func(message, user_id, model_id)

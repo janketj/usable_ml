@@ -5,33 +5,24 @@ from functions import load_model
 
 
 def model_loader():
-    with mui.FormControl(
-        sx={"width": 700, "display": "flex", "justifyContent": "flex-start"},
-    ):
-        mui.InputLabel("Model", id="loaded_model_label")
-        with mui.Select(
-            name="loaded_model",
-            labelId="loaded_model_label",
-            label="Model",
-            size="small",
-            disablePortal=True,
-            value=st.session_state.loaded_model["props"]["value"],
-            onChange=sync(None, "loaded_model"),
-            sx={"width": 200, "color": "#fff"},
-            inputProps={
-                "name": "loaded_model",
-                "id": "loaded_model",
-            },
-        ):
-            for model_info in st.session_state.existing_models:
-                mui.MenuItem(model_info["name"], value=model_info["id"])
-        if st.session_state.loaded_model["props"]["value"] != st.session_state.model_id:
-            with mui.Button(
-                onClick=load_model,
-                variant="outlined",
-                sx={"width": 170},
+    if len(st.session_state.existing_models) > 1:
+        lab, sel, but = st.columns([0.175,0.5,0.2], gap="small")
+        with lab:
+            st.write("Load an existing model:")
+        with sel:
+            st.selectbox(
+                "# Model",
+                [m["name"] for m in st.session_state.existing_models],
+                key="loaded_model",
+                label_visibility="collapsed"
+            )
+        with but:
+            if (
+                st.session_state.loaded_model
+                != st.session_state.model_id
             ):
-                mui.Typography(
-                    "Load Model", sx={"width": "80%", "pt": "4px", "margin": "auto"}
+                st.button(
+                    "Load Model",
+                    on_click=load_model,
+                    use_container_width=True
                 )
-                mui.icon.Upload()

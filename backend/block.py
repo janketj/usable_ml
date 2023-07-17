@@ -22,9 +22,10 @@ class Block(nn.Module):
         self.activ = None
         self.drop = None
 
-        self.normParamas = None
-        self.activParamas = None
-        self.dropParamas = None
+        self.normParams = None
+        self.activParams = None
+        self.dropParams = None
+        self.is_frozen = False
 
         self.globals_dict = globals()
         self.globals_dict["nn"] = nn
@@ -45,6 +46,7 @@ class Block(nn.Module):
             "id": self.getId(),
             "type": self.type,
             "name": self.name,
+            "is_frozen": self.is_frozen,
             "previous": self.getPreviousId(),
             "layers": self.getLayers(),
         }
@@ -76,7 +78,7 @@ class Block(nn.Module):
         if self.activ is None:
             type = params["type"]
             exec(f"self.activ  = nn.{type}()", self.globals_dict)
-            self.activParamas = {"type": type}
+            self.activParams = {"type": type}
             return True
         else:
             print("The block already has a activation layer.")
@@ -108,7 +110,7 @@ class Block(nn.Module):
 
         if self.norm is None:
             self.norm = nn.BatchNorm2d(**params)
-            self.normParamas = params
+            self.normParams = params
             return True
         else:
             print("The block already has a normalization layer.")
@@ -134,7 +136,7 @@ class Block(nn.Module):
 
         if self.drop is None:
             self.drop = nn.Dropout(**params)
-            self.dropParamas = params
+            self.dropParams = params
             return True
         else:
             print("The block already has a dropout layer or it is final block.")
@@ -198,6 +200,7 @@ class Block(nn.Module):
             layer = getattr(self, layerType)
             for param in layer.parameters():
                 param.requires_grad = False
+            self.is_frozen = True
             return True
         else:
             print("No Conv layer defined")
@@ -218,6 +221,7 @@ class Block(nn.Module):
             layer = getattr(self, layerType)
             for param in layer.parameters():
                 param.requires_grad = True
+            self.is_frozen = False
             return True
         else:
             print("No Conv layer defined")
@@ -236,8 +240,8 @@ class ConvBlock(Block):
         self.conv = None
         self.pool = None
 
-        self.convParamas = None
-        self.poolParamas = None
+        self.convParams = None
+        self.poolParams = None
 
         self.outputDim = None
         if previous is not None:
@@ -247,11 +251,11 @@ class ConvBlock(Block):
 
     def getLayers(self):
         layers = {
-            "conv": self.convParamas,
-            "norm": self.normParamas,
-            "activ": self.activParamas,
-            "drop": self.dropParamas,
-            "pool": self.poolParamas,
+            "conv": self.convParams,
+            "norm": self.normParams,
+            "activ": self.activParams,
+            "drop": self.dropParams,
+            "pool": {"type": self.poolParams["type"]} | self.poolParams["params"],
         }
         return layers
 
@@ -288,12 +292,12 @@ class ConvBlock(Block):
         # groups: This controls the connections between input and output channels. By default, it is set to 1, which means each input channel is connected to each output channel. For grouped convolution, you can set the groups parameter to a specific value.
         # bias: This is a Boolean value that determines whether to include a bias term in the convolution operation. By default, it is set to True.
 
-        if params["in_channels"] is None:
+        if "in_channels" not in params:
             params["in_channels"] = 4
 
         if self.conv is None:
             self.conv = nn.Conv2d(**params)
-            self.convParamas = params
+            self.convParams = params
             self.mutateOutputDim()
             return True
         else:
@@ -310,7 +314,7 @@ class ConvBlock(Block):
             bool:  True if the layer is added, False otherwise
         """
 
-        self.poolParamas = params
+        self.poolParams = params
         type = params["type"]
         params = params["params"]
 
@@ -477,9 +481,9 @@ class FCBlock(Block):
     def getLayers(self):
         layers = {
             "linear": self.linearParams,
-            "norm": self.normParamas,
-            "activ": self.activParamas,
-            "drop": self.dropParamas,
+            "norm": self.normParams,
+            "activ": self.activParams,
+            "drop": self.dropParams,
         }
         return layers
 
@@ -514,8 +518,8 @@ class FCBlock(Block):
                 params["in_features"] = self.previous_output_dim
 
         if self.linear is None:
-            """ if self.next is None:
-                params["out_features"] = 10 """
+            if self.next is None:
+                params["out_features"] = 10
 
             self.linear = nn.Linear(params["in_features"], params["out_features"])
             self.linearParams = params

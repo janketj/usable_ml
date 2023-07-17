@@ -51,8 +51,8 @@ def model_page():
                     mui.icon.Add()
 
             mui.Typography(
-                "Layers:",
-                sx={"color": COLORS["primary"], "pt": 2, "pl": 2, "fontSize": "32px"},
+                "Blocks:",
+                sx={"color": COLORS["primary"], "p": 2, "fontSize": "32px"},
             )
         with mui.Stack(
             direction="row",

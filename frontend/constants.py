@@ -1,3 +1,5 @@
+import pandas as pd
+
 COLORS = {
     "bg-paper": "rgb(38,39,48)",
     "bg-primary": "rgb(14, 17, 23)",
@@ -10,9 +12,47 @@ COLORS = {
     "red": "#ff4b4b",
 }
 
+LAYER_NAMES = {
+    "conv": "Convolutional",
+    "drop": "Dropout",
+    "activ": "Activation",
+    "pool": "Pooling",
+    "linear": "Linear",
+    "norm": "Normalization",
+
+}
+
+USED_PARAMS = {
+    "linear_bias": "bias",
+    "conv_padding": "padding",
+    "conv_in_channels": "input channels",
+    "conv_out_channels": "output channels",
+    "conv_kernel_size": "kernel size",
+    "conv_stride": "stride",
+    "conv_bias": "bias",
+    "activ_type": "function",
+    "drop_p": "probability",
+    "pool_type": "type",
+    "pool_kernel_size": "kernel size",
+}
 ACTIVATION_TYPES = ["None", "ReLU", "LeakyReLU", "Sigmoid", "Tanh", "Softmax"]
+
 POOLING_TYPES = ["max", "avg"]
-BLOCK_TYPES = ["Please Select", "FCBlock", "convBlock"]
+
+BLOCK_TYPES = [
+    ["Please Select", "select"],
+    ["Fully Connected (linear) Block", "FCBlock"],
+    ["Convolutional Block", "ConvBlock"],
+]
+
+
+def get_block_type(type):
+    return BLOCK_TYPES[type][0]
+
+
+def get_pool_type(type):
+    return POOLING_TYPES[type][0]
+
 
 PLACEHOLDER_ACCURACY = [
     {
@@ -62,6 +102,8 @@ BLOCK_DEFAULT_PARAMS = {
     "linear_bias": True,
     "linear_in_features": 16,
     "conv_padding": 2,
+    "conv_in_channels": 1,
+    "conv_out_channels": 8,
     "conv_kernel_size": 4,
     "conv_stride": 1,
     "conv_dilation": 1,

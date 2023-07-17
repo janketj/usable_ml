@@ -3,15 +3,48 @@ import torch.nn as nn
 import torch.nn.functional as F
 import uuid
 
-DEFAULT_CONV_BLOCK = {
+DEFAULT_CONV_BLOCK1 = {
     "type": "ConvBlock",
-    "name": "Con_2",
+    "name": "Conv_1",
     "previous": None,
+    "next": "Conv_2",
     "layers": {
         "conv": {
             "in_channels": 1,
             "out_channels": 16,
-            "kernel_size": 6,
+            "kernel_size": 8,
+            "stride": 2,
+            "padding": 2,
+            "dilation": 1,
+            "groups": 1,
+            "bias": True,
+        },
+        "activ": {  # can be None
+            "type": "Tanh",
+        },
+        "pool": {  # can be None
+            "type": "max",
+            "params": {
+                "kernel_size": 2,
+                "padding": 0,
+                "dilation": 1,
+                "return_indices": False,
+                "ceil_mode": False,
+            },
+        },
+    },
+}
+
+DEFAULT_CONV_BLOCK2 = {
+    "type": "ConvBlock",
+    "name": "Conv_2",
+    "previous": "Conv_1",
+    "next": "Block_1fc",
+    "layers": {
+        "conv": {
+            "in_channels": 16,
+            "out_channels": 32,
+            "kernel_size": 4,
             "stride": 1,
             "padding": 1,
             "dilation": 1,
@@ -19,12 +52,12 @@ DEFAULT_CONV_BLOCK = {
             "bias": True,
         },
         "activ": {  # can be None
-            "type": "ReLU",
+            "type": "Tanh",
         },
         "pool": {  # can be None
             "type": "max",
             "params": {
-                "kernel_size": 4,
+                "kernel_size": 2,
                 "padding": 0,
                 "dilation": 1,
                 "return_indices": False,
@@ -37,15 +70,16 @@ DEFAULT_CONV_BLOCK = {
 DEFAULT_FC_BLOCK1 = {
     "type": "FCBlock",
     "name": "Block_1fc",
-    "previous": "Con_2",
+    "previous": "Conv_2",
     "next": "Block_2fc",
     "layers": {
         "linear": {
-            "out_features": 64,
+            "in_features": 512,
+            "out_features": 32,
             "bias": True,
         },
         "activ": {
-            "type": "ReLU",
+            "type": "Tanh",
         },
     },
 }
@@ -56,6 +90,7 @@ DEFAULT_FC_BLOCK2 = {
     "previous": "Block_1fc",
     "layers": {
         "linear": {
+            "in_features": 32,
             "out_features": 10,
             "bias": True,
         }
@@ -86,23 +121,12 @@ class Model(nn.Module):
 
         self.name = name
         self.blockList = BlockList()
-        """ self.createBlock(DEFAULT_CONV_BLOCK)
-        self.createBlock(DEFAULT_FC_BLOCK1)
-        self.createBlock(DEFAULT_FC_BLOCK2)
-        self.convolutional_layers, self.linear_layers = self.blockList.to_layers() """
-        self.convolutional_layers = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=8, stride=2, padding=2),
-            nn.Tanh(),
-            nn.MaxPool2d(kernel_size=2, stride=1),
-            nn.Conv2d(16, 32, kernel_size=4, stride=2, padding=0),
-            nn.Tanh(),
-            nn.MaxPool2d(kernel_size=2, stride=1),
-        )
-        self.linear_layers = nn.Sequential(
-            nn.Linear(512, 32),
-            nn.Tanh(),
-            nn.Linear(32, 10),
-        )
+        if name == "default":
+            self.createBlock(DEFAULT_CONV_BLOCK1)
+            self.createBlock(DEFAULT_CONV_BLOCK2)
+            self.createBlock(DEFAULT_FC_BLOCK1)
+            self.createBlock(DEFAULT_FC_BLOCK2)
+        self.convolutional_layers, self.linear_layers = self.blockList.to_layers()
 
     def to_dict(self):
         return dict(name=self.name, id=self.id, blocks=self.blockList.to_list())
@@ -113,6 +137,7 @@ class Model(nn.Module):
             self.blockList.insert(prevIndex + 1, block)
         else:
             self.blockList.append(block)
+        self.convolutional_layers, self.linear_layers = self.blockList.to_layers()
 
     def assignHead(self, block):
         self.head = block
@@ -166,16 +191,16 @@ class Model(nn.Module):
 
         convBlock.createConv(layers["conv"])
 
-        if "norm" in layers:
+        if "norm" in layers and layers["norm"] is not None:
             convBlock.createNorm(layers["norm"])
 
-        if "activ" in layers:
+        if "activ" in layers and layers["activ"] is not None:
             convBlock.createActiv(layers["activ"])
 
-        if "drop" in layers:
+        if "drop" in layers and layers["drop"] is not None:
             convBlock.createDrop(layers["drop"])
 
-        if "pool" in layers:
+        if "pool" in layers and layers["pool"] is not None:
             convBlock.createPool(layers["pool"])
 
         return convBlock
@@ -185,54 +210,40 @@ class Model(nn.Module):
 
         fcBlock.createLinear(layers["linear"])
 
-        if "norm" in layers:
+        if "norm" in layers and layers["norm"] is not None:
             fcBlock.createNorm(layers["norm"])
 
-        if "activ" in layers:
+        if "activ" in layers and layers["activ"] is not None:
             fcBlock.createActiv(layers["activ"])
 
-        if "drop" in layers:
+        if "drop" in layers and layers["drop"] is not None:
             fcBlock.createDrop(layers["drop"])
 
         return fcBlock
 
     def changeBlockParameters(self, params):
-        info = params["info"]
         block = self.findBlockById(params["id"], params["name"])
 
-        if info["name"] is not None:
-            block.changeName(info["name"])
+        for layer_type, layer_params in params["layers"].items():
+            if layer_params is not None:
+                block.changeLayerParameters(layer_type, layer_params)
+            else:
+                block.removeLayer(layer_type)
+        self.convolutional_layers, self.linear_layers = self.blockList.to_layers()
 
-        for type, params in info["layers"].items():
-            if params is not None:
-                block.changeLayerParameters(type, params)
+    def freezeBlocklayer(self, params):
+        block = self.findBlockById(params["id"])
+        if "conv" in params["layers"]:
+            block.freezeLayer("conv")
+        if "linear" in params["layers"]:
+            block.freezeLayer("linear")
 
-    def removeBlocklayer(
-        self,
-        dict,
-    ):
-        info = dict["info"]
-        block = self.findBlockById(dict["id"])
-
-        for type, removed in info["layers"].items():
-            if removed:
-                block.removeLayer(type)
-
-    def freezeBlocklayer(self, dict):
-        info = dict["info"]
-        block = self.findBlockById(dict["id"])
-
-        for type, freeze in info["layers"].items():
-            if freeze:
-                block.freezeLayer(type)
-
-    def unfreezeBlocklayer(self, dict):
-        info = dict["info"]
-        block = self.findBlockById(dict["id"])
-
-        for type, unfreeze in info["layers"].items():
-            if unfreeze:
-                block.unfreezeLayer(type)
+    def unfreezeBlocklayer(self, params):
+        block = self.findBlockById(params["id"])
+        if "conv" in params["layers"]:
+            block.unfreezeLayer("conv")
+        if "linear" in params["layers"]:
+            block.unfreezeLayer("linear")
 
     def deleteBlock(self, dict):
         block = self.findBlockById(dict["id"], dict["name"])
@@ -243,8 +254,8 @@ class Model(nn.Module):
         if block.next is not None:
             next_block = self.findBlockById(block.next, block.next)
             next_block.previous = block.previous
-
         self.blockList.pop(block_index)
+        self.convolutional_layers, self.linear_layers = self.blockList.to_layers()
 
     def forward(self, x):
         x = self.convolutional_layers(x)
