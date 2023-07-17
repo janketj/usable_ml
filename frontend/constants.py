@@ -101,6 +101,7 @@ PLACEHOLDER_LOSS = [
 BLOCK_DEFAULT_PARAMS = {
     "linear_bias": True,
     "linear_in_features": 16,
+    "linear_out_features": 32,
     "conv_padding": 2,
     "conv_in_channels": 1,
     "conv_out_channels": 8,
@@ -117,9 +118,9 @@ BLOCK_DEFAULT_PARAMS = {
     "drop_p": 0.5,
     "drop_inplace": False,
     "use_pool_layer": False,
-    "pool_type": "max",
+    "pool_type": 0,
     "pool_stride": 1,
-    "pool_padding": 2,
+    "pool_padding": 0,
     "pool_kernel_size": 4,
 }
 

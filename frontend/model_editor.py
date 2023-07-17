@@ -21,7 +21,7 @@ def block_layers(block_type):
     )
     st.divider()
     if block_type == "FCBlock":
-        fc_col1, fc_col2, _ = st.columns(3)
+        fc_col1, fc_col2,fc_col3 = st.columns(3)
         with fc_col1:
             st.markdown("##### Fully Connected Layer Parameters")
         with fc_col2:
@@ -34,6 +34,16 @@ def block_layers(block_type):
                         The bias is used by the model to offset the result. It helps to shift the activation function towards the positive or negative side.".replace(
                     "  ", ""
                 ),
+            )
+        with fc_col3:
+            st.number_input(
+                "Output Features",
+                1,
+                64,
+                vals["linear_out_features"],
+                1,
+                key="linear_out_features",
+                help="This is the number of output features produced by the linear layer.",
             )
     if block_type == "ConvBlock":
         st.markdown("##### Convolutional Layer Parameters")
@@ -230,6 +240,7 @@ def block_form(index):
                 if bt == "FCBlock":
                     new_block["layers"]["linear"] = {
                         "bias": st.session_state.linear_bias,
+                        "out_features": st.session_state.linear_out_features,
                     }
                 if st.session_state.use_norm_layer:
                     new_block["layers"]["norm"] = {}
@@ -320,5 +331,5 @@ def model_creator():
             "Create model",
             on_click=create_model,
             disabled=new_model_name == st.session_state.model["name"],
-            type="primary"
+            type="primary",
         )

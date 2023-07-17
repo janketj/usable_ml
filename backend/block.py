@@ -521,7 +521,7 @@ class FCBlock(Block):
                 params["in_features"] = self.previous_output_dim
 
         if self.linear is None:
-            if self.next is None:
+            if self.next is None and "out_features" not in params:
                 params["out_features"] = 10
 
             self.linear = nn.Linear(params["in_features"], params["out_features"])
