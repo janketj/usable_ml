@@ -8,6 +8,7 @@ from functions import (
     reset_training,
     update,
     get_progress,
+    save_model,
 )
 
 
@@ -47,7 +48,7 @@ def play_bar():
                 max=st.session_state.epochs_validated,
                 marks=st.session_state.training_events,
                 sx={
-                    "width": "80%",
+                    "width": "85%",
                     "margin": "auto",
                     "& .MuiSlider-thumb": {
                         "height": 20,
@@ -89,5 +90,4 @@ def play_bar():
                     },
                 },
             )
-            """ with mui.Button(onClick=save_model()):
-                mui.icon.Download() """
+            mui.Button("Save Model", endIcon=mui.icon.Download(), onClick=save_model)

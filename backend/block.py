@@ -250,12 +250,15 @@ class ConvBlock(Block):
                 self.previous_output_dim = previous.outputDim
 
     def getLayers(self):
+        pool_layer = None
+        if self.poolParams:
+            pool_layer =  {"type": self.poolParams["type"]} | self.poolParams["params"]
         layers = {
             "conv": self.convParams,
             "norm": self.normParams,
             "activ": self.activParams,
             "drop": self.dropParams,
-            "pool": {"type": self.poolParams["type"]} | self.poolParams["params"],
+            "pool": pool_layer,
         }
         return layers
 

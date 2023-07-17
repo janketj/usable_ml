@@ -15,7 +15,7 @@ class Evaluation:
         and the current training instance (to get the used loss function and
         other parameters possibly)."""
         self.data_loader = data_loader
-        self.composite = EpsilonGammaBox(low=-3.0, high=3.0)
+        self.composite = EpsilonGammaBox(low=0.0, high=1.0)
 
     def evaluate_digit(self, image, model):
         """this is probably not working yet, but at least I got started on it
@@ -23,7 +23,7 @@ class Evaluation:
         for and against the prediction. this is supposed to return the
         prediction as well as the heatmap image if everything went right."""
         with Gradient(model=model, composite=self.composite) as attributor:
-            out, relevance = attributor(image, torch.eye(1000)[[0]])
+            out, relevance = attributor(image)
             return out, relevance
 
     def accuracy(self, model: Model):

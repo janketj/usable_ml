@@ -25,6 +25,9 @@ def catch_all(messageType, data=None):
         update_progress(data)
         return
     print(f"FRONTEND: Received {messageType}")
+    curr_waiting = get_state("waiting")
+    if curr_waiting == messageType:
+        dump_state("waiting", None)
     if messageType == "update_params":
         add_training_event(data)
     if messageType == "init_user":
@@ -86,6 +89,7 @@ def send(msg, receiver: str = "tcp://localhost:5555"):
 def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
     model_id = st.session_state.model_id
+    st.session_state.waiting = messageType
     send(
         dict(
             messageType=messageType,
@@ -178,8 +182,11 @@ def get_progress():
 def update():
     st.session_state.training_events = get_state("training_events")
     st.session_state.model = get_state("model")
+    st.session_state.model_id = st.session_state.model["id"]
+    st.session_state.loaded_model = st.session_state.model["name"]
     st.session_state.existing_models = get_state("existing_models")
     st.session_state.prediction = get_state("prediction")
+    st.session_state.waiting = get_state("waiting")
 
 
 def update_params():

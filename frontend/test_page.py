@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from typing import Tuple
 from session_state_dumper import get_state
+from zennit.image import imgify
 
 from functions import predict_class
 
@@ -35,10 +36,17 @@ def test_page():
     with col1:
         st.header("Draw a digit")
         st.write(
-            "Place it centrally in the white box, it has to be a single digit from 0 to 9, wait a bit and then see what the model predicts. Internally the image is compressed to a 28x28 pixel image."
+            ""
         )
+        st.markdown(
+            "<p style='padding-top:10px'>Place it centrally in the white box,\
+            it has to be a single digit from 0 to 9, wait a bit and then see\
+            what the model predicts. Internally the image is compressed to a 28x28 pixel image.</p>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
         canvas_result = st_canvas(
-            fill_color="#000",  # Fixed fill color with some opacity
+            fill_color="#fff",  # Fixed fill color with some opacity
             stroke_width=16,
             stroke_color="#fff",
             background_color="#000",
@@ -60,15 +68,27 @@ def test_page():
     with col2:
         st.header("PREDICTED CLASS: ")
         if st.session_state.prediction["prediction"] is not None:
-            st.header(st.session_state.prediction["prediction"])
+            st.markdown(f'# {st.session_state.prediction["prediction"]}')
+            st.divider()
+            st.markdown("*what will be sent in lower resolution:*")
+            st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
+
+            st.image(
+                pixel_data,
+                width=140,
+            )
 
     with col3:
         st.header("Important Pixels")
-        st.write(
-            "This image shows which pixels were important in the prediction. Red means that the pixel(s) had positive contribution to the classification, blue means negative contribution"
+        st.markdown(
+            "<p style='padding-top:10px'> This image shows which pixels were important \
+                in the prediction. Red means that the pixel(s) had positive contribution to the classification, blue means negative contribution</p>",
+            unsafe_allow_html=True,
         )
+        st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
         if st.session_state.prediction["prediction"] is not None:
+            heatmap = imgify(st.session_state.prediction["heatmap"][0])
             st.image(
-                np.array(st.session_state.prediction["heatmap"]),
+                heatmap,
                 width=280,
             )

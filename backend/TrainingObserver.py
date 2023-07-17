@@ -24,8 +24,6 @@ class TrainingObserver(Observer):
             MessageType.GET_PROGRESS: self.get_progress,
             MessageType.INIT_USER: self.init_user,
             MessageType.EVALUATE_DIGIT: self.evaluate_digit,
-            MessageType.CREATE_MODEL: self.init_user,
-            MessageType.LOAD_MODEL: self.init_user,
         }
         func = switcher.get(messageType, lambda: "Invalid message type")
         return func(message, user_id, model_id)
@@ -108,8 +106,8 @@ class TrainingObserver(Observer):
         }
 
     def evaluate_digit(self, image, user_id, model_id):
-        pred = self.user_trainings[user_id].predict_class(image)
+        pred, heatmap = self.user_trainings[user_id].predict_class(image)
         return {
             "prediction": pred,
-            "heatmap": image,
+            "heatmap": heatmap,
         }

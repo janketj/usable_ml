@@ -45,6 +45,8 @@ class Training:
 
     def update_batch_size(self, batch_size):
         self.batch_size = batch_size
+        self.train_loader = get_data_loaders(batch_size=self.batch_size, test=False)
+        self.train_iter = iter(self.train_loader)
 
     def update_epochs(self, epochs):
         self.epochs = epochs
@@ -80,15 +82,19 @@ class Training:
         self.is_training = False
         self.current_batch = 0
         self.current_epoch = 0
+        self.train_iter = iter(self.train_loader)
 
     def predict_class(self, data):
         self.model.eval()
-        with torch.no_grad():
-            raw_image = np.array(data, dtype = np.float32)
-            image = torch.reshape(torch.from_numpy(raw_image), (1, 1, 28, 28))
-            res = self.model(image)
-            print("in training:",res, res.argmax(dim=1))
-            return int(res.argmax(dim=1))
+        out, relevance = self.evaluation.evaluate_digit(
+            torch.reshape(
+                torch.from_numpy(np.array(data, dtype=np.float32)), (1, 1, 28, 28)
+            ),
+            self.model,
+        )
+        heatmap = relevance.tolist()
+        
+        return int(out.argmax(dim=1)), heatmap
 
     def current_prog(self):
         return self.current_epoch + (

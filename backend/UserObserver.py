@@ -18,6 +18,8 @@ class UserObserver(Observer):
         """
         switcher = {
             MessageType.INIT_USER: self.init_user,
+            MessageType.CREATE_MODEL: self.create_model,
+            MessageType.LOAD_MODEL: self.update_model,
         }
         func = switcher.get(messageType, lambda: "Invalid message type")
         return func(message, user_id, model_id)
@@ -30,4 +32,17 @@ class UserObserver(Observer):
         self.user_models[user_id] = {}
         self.user_models[user_id][model_id] = defaultModel
         self.user_trainings[user_id] = Training(defaultModel)
-        return {"existing_models": load_models(), "defaultModel": defaultModel.to_dict()}
+        return {
+            "existing_models": load_models(),
+            "defaultModel": defaultModel.to_dict(),
+        }
+
+    def create_model(self, message, user_id, model_id):
+        print("create model user")
+        self.user_trainings[user_id].model = self.user_models[user_id][message]
+        return self.user_models[user_id][message].to_dict()
+
+    def update_model(self, message, user_id, model_id):
+        print("update model user")
+        self.user_trainings[user_id].model = self.user_models[user_id][message]
+        return self.user_models[user_id][message].to_dict()

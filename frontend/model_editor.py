@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from streamlit_elements import mui
+from streamlit_elements import mui, sync
 from constants import (
     COLORS,
     BLOCK_DEFAULT_PARAMS,
@@ -199,7 +199,6 @@ def block_form(index):
                     help="Convolutional blocks use a 2-dimensional mask to extract regions from an image. \
                             Fully connected blocks are linear functions that combine all the weights of the previous layers.",
                 )
-                st.divider()
 
             bt = BLOCK_TYPES[block_type][1]
 
@@ -251,6 +250,7 @@ def block_form(index):
                             "kernel_size": st.session_state.pool_kernel_size,
                         },
                     }
+
                 if not is_edit:
                     add_block(new_block)
                 else:
@@ -269,16 +269,12 @@ def block_form(index):
                 st.divider()
                 act_but_col1, act_but_col2, act_but_col3 = st.columns(3)
                 with act_but_col1:
-                    st.button(
-                        submit_text,
-                        on_click=submit_block,
-                    )
+                    st.button(submit_text, on_click=submit_block, type="primary")
                 with act_but_col2:
                     st.button(
                         "### Cancel",
                         on_click=cancel_edit,
                     )
-                st.divider()
 
 
 def block_adder(index):
@@ -315,6 +311,14 @@ def block_adder(index):
 
 
 def model_creator():
-    new_model_name = st.text_input("Model Name", "", key="model_name")
-    if new_model_name:
-        st.button("Create model", on_click=create_model)
+    with st.expander("NEW MODEL", True):
+        st.markdown("### Create a new model by choosing a name first")
+        st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
+        new_model_name = st.text_input("Model Name", "", key="model_name")
+        st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
+        st.button(
+            "Create model",
+            on_click=create_model,
+            disabled=new_model_name == st.session_state.model["name"],
+            type="primary"
+        )

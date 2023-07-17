@@ -42,6 +42,7 @@ if "tab" not in st.session_state:
 
 if "progress" not in st.session_state:
     st.session_state.progress = 0
+    st.session_state.waiting = None
     st.session_state.vis_data = {"accuracy": [], "loss": []}
     dump_state("progress", 0)
     dump_state("vis_data", st.session_state.vis_data)
