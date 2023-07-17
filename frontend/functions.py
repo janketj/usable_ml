@@ -167,10 +167,9 @@ def create_model():
     send_message(MessageType.CREATE_MODEL, st.session_state.model_name)
 
 
-def load_model():
-    model_id = st.session_state.loaded_model
+def load_model(loaded_model):
     st.session_state.tab = "model"
-    send_message(MessageType.LOAD_MODEL, model_id)
+    send_message(MessageType.LOAD_MODEL, loaded_model)
 
 
 def get_progress():

@@ -11,17 +11,21 @@ def model_loader():
         with lab:
             st.write("Load an existing model:")
         with sel:
-            st.selectbox(
+            loaded_model = st.selectbox(
                 "# Model",
                 ex_models,
-                key="loaded_model",
+                index=ex_models.index(st.session_state.model["name"]),
                 label_visibility="collapsed",
             )
         with but:
-            if st.session_state.loaded_model != st.session_state.model_id:
-                st.button(
-                    "Load Model",
-                    on_click=load_model,
-                    type="primary",
-                    use_container_width=True,
-                )
+            def load():
+                load_model(loaded_model)
+            but_type = (
+                "primary" if loaded_model != st.session_state.model_id else "secondary"
+            )
+            st.button(
+                "Load Model",
+                on_click=load,
+                type=but_type,
+                use_container_width=True,
+            )
