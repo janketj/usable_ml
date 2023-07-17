@@ -45,6 +45,7 @@ class Training:
 
     def update_batch_size(self, batch_size):
         self.batch_size = batch_size
+        self.current_batch = 0
         self.train_loader = get_data_loaders(batch_size=self.batch_size, test=False)
         self.train_iter = iter(self.train_loader)
 

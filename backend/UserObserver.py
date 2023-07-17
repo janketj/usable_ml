@@ -19,7 +19,7 @@ class UserObserver(Observer):
         switcher = {
             MessageType.INIT_USER: self.init_user,
             MessageType.CREATE_MODEL: self.create_model,
-            MessageType.LOAD_MODEL: self.update_model,
+            MessageType.LOAD_MODEL: self.load_model,
         }
         func = switcher.get(messageType, lambda: "Invalid message type")
         return func(message, user_id, model_id)
@@ -44,9 +44,9 @@ class UserObserver(Observer):
         self.user_trainings[user_id].model = self.user_models[user_id][message]
         return self.user_models[user_id][message].to_dict()
 
-    def update_model(self, message, user_id, model_id):
+    def load_model(self, message, user_id, model_id):
         print("update model user")
         if message not in self.user_models[user_id]:
-            self.user_models[user_id][message] = create_model(message)
+            self.user_models[user_id][message] = load_model(message)
         self.user_trainings[user_id].model = self.user_models[user_id][message]
         return self.user_models[user_id][message].to_dict()

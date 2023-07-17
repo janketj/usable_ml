@@ -54,7 +54,7 @@ def model_page():
                 "Blocks:",
                 sx={"color": COLORS["primary"], "p": 2, "fontSize": "32px"},
             )
-        else:
+        elif st.session_state.model_creator_open:
             model_creator()
         with mui.Stack(
             direction="row",
