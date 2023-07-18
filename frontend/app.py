@@ -56,8 +56,8 @@ if "learning_rate" not in st.session_state:
 if "batch_size" not in st.session_state:
     st.session_state.batch_size = 256
 if "epochs" not in st.session_state:
-    st.session_state.epochs = 10
-    st.session_state.epochs_validated = 10
+    st.session_state.epochs = 5
+    st.session_state.epochs_validated = 5
 
 if "optimizer" not in st.session_state:
     st.session_state.optimizer = {
@@ -91,11 +91,6 @@ if "tab" not in st.session_state:
 if "training_events" not in st.session_state:
     st.session_state.training_events = []
     dump_state("training_events", st.session_state.training_events)
-
-st.session_state.training_events = get_state("training_events")
-st.session_state.model = get_state("model")
-st.session_state.existing_models = get_state("existing_models")
-st.session_state.prediction = get_state("prediction")
 
 menu_bar()
 tit, lod = st.columns(2)

@@ -3,20 +3,10 @@ import socketio
 
 from backend.MessageType import MessageType
 from session_state_dumper import dump_state, get_state
+from constants import MODEL_MESSAGES
 
 sio = socketio.Client()
 sio.connect("http://localhost:6000")
-
-model_messages = [
-    MessageType.LOAD_MODEL,
-    MessageType.SAVE_MODEL,
-    MessageType.ADD_BLOCK,
-    MessageType.EDIT_BLOCK,
-    MessageType.REMOVE_BLOCK,
-    MessageType.REMOVE_BLOCK_LAYER,
-    MessageType.FREEZE_BLOCK_LAYER,
-    MessageType.UNFREEZE_BLOCK_LAYER,
-]
 
 
 @sio.on("*")
@@ -44,7 +34,7 @@ def catch_all(messageType, data=None):
     if messageType == "evaluate_digit":
         print(data["prediction"])
         dump_state("prediction", data)
-    if messageType in model_messages:
+    if messageType in MODEL_MESSAGES:
         update_model(data)
 
 
@@ -71,6 +61,13 @@ def update_model(data):
 
 def update_progress(data):
     vis_data = get_state("vis_data")
+    if len(vis_data["loss"]) > 0 and vis_data["loss"][-1]["x"] > data["progress"]:
+        vis_data["accuracy"] = list(
+            filter(lambda a: (a["x"] <= data["progress"]), vis_data["accuracy"])
+        )
+        vis_data["loss"] = list(
+            filter(lambda a: (a["x"] <= data["progress"]), vis_data["loss"])
+        )
     vis_data["accuracy"] += [{"x": data["progress"], "y": data["accuracy"]}]
     vis_data["loss"] += [{"x": data["progress"], "y": data["loss"]}]
     dump_state("progress", data["progress"])
@@ -89,7 +86,8 @@ def send(msg, receiver: str = "tcp://localhost:5555"):
 def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
     model_id = st.session_state.model_id
-    st.session_state.waiting = messageType
+    if messageType != "get_progress":
+        st.session_state.waiting = messageType
     send(
         dict(
             messageType=messageType,
@@ -105,13 +103,13 @@ def interrupt():
 
 
 def start_training():
-    send_message(MessageType.START_TRAINING)
     st.session_state.is_training = 1
+    send_message(MessageType.START_TRAINING)
 
 
 def pause_training():
-    send_message(MessageType.STOP_TRAINING)
     st.session_state.is_training = 0
+    send_message(MessageType.STOP_TRAINING)
 
 
 def reset_training():
@@ -126,20 +124,6 @@ def reset_training():
 
 def save_model():
     send_message(MessageType.SAVE_MODEL)
-
-
-def skip_forward():
-    if "progress" not in st.session_state:
-        st.session_state.progress = {"p": 0, "loss": 100}
-    elif st.session_state.progress["p"] < st.session_state.epochs:
-        st.session_state.progress["p"] += 1
-
-
-def skip_backward():
-    if "progress" not in st.session_state:
-        st.session_state.progress = 0
-    elif st.session_state.progress > 4:
-        st.session_state.progress -= 1
 
 
 def add_block(params):
@@ -185,7 +169,13 @@ def update():
     st.session_state.loaded_model = st.session_state.model["name"]
     st.session_state.existing_models = get_state("existing_models")
     st.session_state.prediction = get_state("prediction")
+    st.session_state.training_events = get_state("training_events")
     st.session_state.waiting = get_state("waiting")
+    if (
+        st.session_state.progress >= st.session_state.epochs
+        and st.session_state.is_training
+    ):
+        pause_training()
 
 
 def update_params():

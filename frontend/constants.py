@@ -1,4 +1,4 @@
-import pandas as pd
+from backend.MessageType import MessageType
 
 COLORS = {
     "bg-paper": "rgb(38,39,48)",
@@ -19,7 +19,6 @@ LAYER_NAMES = {
     "pool": "Pooling",
     "linear": "Linear",
     "norm": "Normalization",
-
 }
 
 USED_PARAMS = {
@@ -129,3 +128,15 @@ PLACEHOLDER_MODEL = {
     "id": "default",
     "blocks": [],
 }
+
+
+MODEL_MESSAGES = [
+    MessageType.LOAD_MODEL,
+    MessageType.SAVE_MODEL,
+    MessageType.ADD_BLOCK,
+    MessageType.EDIT_BLOCK,
+    MessageType.REMOVE_BLOCK,
+    MessageType.REMOVE_BLOCK_LAYER,
+    MessageType.FREEZE_BLOCK_LAYER,
+    MessageType.UNFREEZE_BLOCK_LAYER,
+]

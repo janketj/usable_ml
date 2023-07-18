@@ -5,12 +5,10 @@ from constants import (
     COLORS,
     BLOCK_DEFAULT_PARAMS,
     ACTIVATION_TYPES,
-    POOLING_TYPES,
     BLOCK_TYPES,
     get_block_type,
-    get_pool_type,
 )
-from functions import edit_block, pause_training, add_block, create_model
+from functions import edit_block, add_block, create_model
 
 
 def block_layers(block_type):
@@ -21,7 +19,7 @@ def block_layers(block_type):
     )
     st.divider()
     if block_type == "FCBlock":
-        fc_col1, fc_col2,fc_col3 = st.columns(3)
+        fc_col1, fc_col2, fc_col3 = st.columns(3)
         with fc_col1:
             st.markdown("##### Fully Connected Layer Parameters")
         with fc_col2:

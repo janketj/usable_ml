@@ -19,14 +19,14 @@ class Training:
         )
         self.optimizer_name = "SGD"
         self.batch_size = 256
-        self.epochs = 10
+        self.epochs = 5
         self.use_cuda = False
         self.device = torch.device("cpu")
         self.is_training = False
         self.current_epoch = 0
         self.current_batch = 0
         self.loss = 100
-        self.running_loss = 100
+        self.running_loss = 0
         self.accuracy = 0
         self.train_loader = get_data_loaders(batch_size=self.batch_size, test=False)
         self.test_loader = get_data_loaders(batch_size=self.batch_size, test=True)
@@ -94,7 +94,7 @@ class Training:
             self.model,
         )
         heatmap = relevance.tolist()
-        
+
         return int(out.argmax(dim=1)), heatmap
 
     def current_prog(self):
@@ -135,11 +135,11 @@ class Training:
                     self.running_loss += loss.item() * inputs.size(0)
                     self.current_batch = self.current_batch + 1
                     self.loss = self.running_loss / (
-                        self.batch_size * (self.current_batch)
+                        self.batch_size * self.current_batch
+                        + (self.dataset_len * (self.current_epoch))
                     )
                 except StopIteration:
                     self.train_iter = iter(self.train_loader)
-                    accuracy = self.evaluation.accuracy(self.model)
                     if not self.model.training:
                         self.model.train()
                     self.current_batch = 0

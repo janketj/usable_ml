@@ -35,9 +35,7 @@ def test_page():
 
     with col1:
         st.header("Draw a digit")
-        st.write(
-            ""
-        )
+        st.write("")
         st.markdown(
             "<p style='padding-top:10px'>Place it centrally in the white box,\
             it has to be a single digit from 0 to 9, wait a bit and then see\
@@ -45,37 +43,47 @@ def test_page():
             unsafe_allow_html=True,
         )
         st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
-        canvas_result = st_canvas(
-            fill_color="#fff",  # Fixed fill color with some opacity
-            stroke_width=16,
-            stroke_color="#fff",
-            background_color="#000",
-            update_streamlit=True,
-            height=280,
-            width=280,
-            drawing_mode="freedraw",
-            key="canvas",
-        )
+        draw_col, show_col = st.columns(2)
+        with draw_col:
+            canvas_result = st_canvas(
+                fill_color="#fff",  # Fixed fill color with some opacity
+                stroke_width=16,
+                stroke_color="#fff",
+                background_color="#000",
+                update_streamlit=True,
+                height=280,
+                width=280,
+                drawing_mode="freedraw",
+                key="canvas",
+            )
+            if canvas_result.image_data is not None:
+                large_image = canvas_result.image_data[:, :, 0]
+                pixel_data = downsample_by_averaging(large_image, (10, 10))
+                if st.button("Predict Class") and pixel_data is not None:
+                    predict_class(pixel_data.tolist())
 
-        # TODO: send image data to evaluator
-        if canvas_result.image_data is not None:
-            large_image = canvas_result.image_data[:, :, 0]
-            pixel_data = downsample_by_averaging(large_image, (10, 10))
-            if st.button("Predict Class") and pixel_data is not None:
-                predict_class(pixel_data.tolist())
+        with show_col:
+            st.divider()
+            st.markdown("*what will be sent in lower resolution:*")
+            st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
+            if pixel_data is not None:
+                st.image(
+                    pixel_data,
+                    width=140,
+                )
         # st.write(canvas_result.image_data)
 
     with col2:
         st.header("PREDICTED CLASS: ")
-        if st.session_state.prediction["prediction"] is not None:
-            st.markdown(f'# {st.session_state.prediction["prediction"]}')
-            st.divider()
-            st.markdown("*what will be sent in lower resolution:*")
-            st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
-
-            st.image(
-                pixel_data,
-                width=140,
+        if st.session_state.waiting == "evaluate_digit":
+            st.markdown("# *LOADING...*")
+        if (
+            st.session_state.waiting != "evaluate_digit"
+            and st.session_state.prediction["prediction"] is not None
+        ):
+            st.markdown(
+                f'<h1 style="font-size:120px;color:#ff4b4b"> {st.session_state.prediction["prediction"]} </h1>',
+                unsafe_allow_html=True,
             )
 
     with col3:
