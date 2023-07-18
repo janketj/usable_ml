@@ -74,6 +74,7 @@ def model_page():
                 and len(st.session_state.model["blocks"]) > 0
             ):
                 b_index = 0
+                block_adder(-1)
                 for b in st.session_state.model["blocks"]:
                     block(b, b_index)
                     block_adder(b_index)

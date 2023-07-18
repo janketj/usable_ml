@@ -50,6 +50,21 @@ def apply_style():
             position: relative;
             color: red;
         }
+        h5 a {
+            display: none !important;
+        }
+        h4 a {
+            display: none !important;
+        }
+        h3 a {
+            display: none !important;
+        }
+        h2 a {
+            display: none !important;
+        }
+        h1 a {
+            display: none !important;
+        }
     </style>
     """,
         unsafe_allow_html=True,

@@ -12,6 +12,7 @@ sio.connect("http://localhost:6000")
 @sio.on("*")
 def catch_all(messageType, data=None):
     if messageType == "get_progress":
+        print(data["progress"])
         update_progress(data)
         return
     print(f"FRONTEND: Received {messageType}")
@@ -34,6 +35,9 @@ def catch_all(messageType, data=None):
     if messageType == "evaluate_digit":
         print(data["prediction"])
         dump_state("prediction", data)
+    if messageType == "reset_training":
+        dump_state("training_events", [])
+        update_progress(data)
     if messageType in MODEL_MESSAGES:
         update_model(data)
 
@@ -115,6 +119,7 @@ def pause_training():
 def reset_training():
     st.session_state.is_training = 0
     st.session_state.progress = 0
+    st.session_state.training_events = []
     st.session_state.vis_data = {"accuracy": [], "loss": []}
     dump_state("progress", st.session_state.progress)
     dump_state("vis_data", st.session_state.vis_data)
@@ -148,7 +153,7 @@ def unfreeze_block(params):
 
 def create_model():
     st.session_state.model_creator_open = False
-    send_message(MessageType.CREATE_MODEL, st.session_state.model_name)
+    send_message(MessageType.CREATE_MODEL, st.session_state.model_name_new)
 
 
 def load_model(loaded_model):
@@ -169,7 +174,6 @@ def update():
     st.session_state.loaded_model = st.session_state.model["name"]
     st.session_state.existing_models = get_state("existing_models")
     st.session_state.prediction = get_state("prediction")
-    st.session_state.training_events = get_state("training_events")
     st.session_state.waiting = get_state("waiting")
     if (
         st.session_state.progress >= st.session_state.epochs

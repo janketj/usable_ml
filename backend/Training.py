@@ -71,7 +71,6 @@ class Training:
         self.is_training = True
         # Move the model to the selected device
         self.model.to(self.device)
-
         # Set the model to training mode
         self.model.train()
 
@@ -80,10 +79,28 @@ class Training:
         self.model.eval()
 
     def reset_training(self):
+        self.model.eval()
         self.is_training = False
         self.current_batch = 0
         self.current_epoch = 0
+        self.loss = 3.5
+        self.running_loss = 0
+        self.accuracy = 0
+        with torch.no_grad():
+            for layer in self.model.children():
+                if hasattr(layer, 'reset_parameters'):
+                    layer.reset_parameters()
+                elif hasattr(layer, 'children'):
+                    for lchildren in layer.children():
+                        if hasattr(lchildren, 'reset_parameters'):
+                            lchildren.reset_parameters()
         self.train_iter = iter(self.train_loader)
+        return {
+            "message": "current progress",
+            "progress": 0,
+            "accuracy": 0,
+            "loss": 3.5,
+        }
 
     def predict_class(self, data):
         self.model.eval()

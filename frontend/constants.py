@@ -124,7 +124,7 @@ BLOCK_DEFAULT_PARAMS = {
 }
 
 PLACEHOLDER_MODEL = {
-    "name": "Default Model",
+    "name": "default",
     "id": "default",
     "blocks": [],
 }

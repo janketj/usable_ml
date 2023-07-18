@@ -189,10 +189,11 @@ def block_layers(block_type):
 def block_form(index):
     if st.session_state.block_form_open == index:
         is_edit = st.session_state.edit_block if st.session_state.edit_block else None
+        position = f'after Block {index + 1}' if index >= 0 else "at the start"
         exp_title = (
             f'Edit Block {is_edit["name"]} at Position {index}'
             if is_edit
-            else f"Add new Block after Block {index + 1}"
+            else f"Add new Block {position}"
         )
         with st.expander(exp_title, st.session_state.block_form_open == index):
             block_type = is_edit["block_type"] if is_edit is not None else 0
@@ -292,12 +293,13 @@ def block_adder(index):
         st.session_state.block_form_open = index
 
     block_form(index)
-
-    if index > 0 or len(st.session_state.model["blocks"]) > 0:
+    len_blocks = len(st.session_state.model["blocks"])
+    if index > 0 or len_blocks > 0:
         with mui.Box(
             sx={"width": "64px", "height": "60px", "alignItems": "center"},
-        ):
-            mui.icon.ArrowForward(sx={"minWidth": "64px"})
+        ):  
+            if index >= 0 and index < len_blocks -1:
+                mui.icon.ArrowForward(sx={"minWidth": "64px"})
             mui.Button(
                 mui.icon.Add(),
                 onClick=add_block_open,
@@ -323,7 +325,7 @@ def model_creator():
     with st.expander("NEW MODEL", True):
         st.markdown("### Create a new model by choosing a name first")
         st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
-        new_model_name = st.text_input("Model Name", "", key="model_name")
+        new_model_name = st.text_input("Model Name", "", key="model_name_new")
         st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
         st.button(
             "Create model",
