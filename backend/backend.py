@@ -51,6 +51,7 @@ if __name__ == "__main__":
     """
     controller.register(MessageType.START_TRAINING, training_observer)
     controller.register(MessageType.STOP_TRAINING, training_observer)
+    controller.register(MessageType.RESET_TRAINING, training_observer)
     controller.register(MessageType.UPDATE_PARAMS, training_observer)
     controller.register(MessageType.GET_PROGRESS, training_observer)
     controller.register(MessageType.EVALUATE_DIGIT, training_observer)

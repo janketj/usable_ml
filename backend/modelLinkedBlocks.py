@@ -5,9 +5,9 @@ import uuid
 
 DEFAULT_CONV_BLOCK1 = {
     "type": "ConvBlock",
-    "name": "Conv_1",
+    "name": "Convolution_1",
     "previous": None,
-    "next": "Conv_2",
+    "next": "Convolution_2",
     "layers": {
         "conv": {
             "in_channels": 1,
@@ -37,9 +37,9 @@ DEFAULT_CONV_BLOCK1 = {
 
 DEFAULT_CONV_BLOCK2 = {
     "type": "ConvBlock",
-    "name": "Conv_2",
-    "previous": "Conv_1",
-    "next": "Block_1fc",
+    "name": "Convolution_2",
+    "previous": "Convolution_1",
+    "next": "Linear_3",
     "layers": {
         "conv": {
             "in_channels": 16,
@@ -69,9 +69,9 @@ DEFAULT_CONV_BLOCK2 = {
 
 DEFAULT_FC_BLOCK1 = {
     "type": "FCBlock",
-    "name": "Block_1fc",
-    "previous": "Conv_2",
-    "next": "Block_2fc",
+    "name": "Linear_3",
+    "previous": "Convolution_2",
+    "next": "Linear_4",
     "layers": {
         "linear": {
             "in_features": 512,
@@ -86,8 +86,8 @@ DEFAULT_FC_BLOCK1 = {
 
 DEFAULT_FC_BLOCK2 = {
     "type": "FCBlock",
-    "name": "Block_2fc",
-    "previous": "Block_1fc",
+    "name": "Linear_4",
+    "previous": "Linear_3",
     "layers": {
         "linear": {
             "in_features": 32,
@@ -136,7 +136,7 @@ class Model(nn.Module):
             prevIndex = self.findBlockIndex(block.previous, block.previous)
             self.blockList.insert(prevIndex + 1, block)
         else:
-            self.blockList.append(block)
+            self.blockList.insert(0, block)
         self.convolutional_layers, self.linear_layers = self.blockList.to_layers()
 
     def assignHead(self, block):

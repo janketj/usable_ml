@@ -35,38 +35,43 @@ class TrainingObserver(Observer):
         """
         Start training
         """
-        trainingInstance = self.user_trainings[user_id]
+        trainingInstance: Training = self.user_trainings[user_id]
         trainingInstance.start_training()
+        prog = trainingInstance.current_prog()
+        mes = "resumed training" if prog > 0 else "started training"
         return {
-            "message": "start",
-            "at": trainingInstance.current_prog(),
+            "message": mes,
+            "at": prog,
         }
 
     def stop_training(self, training, user_id, model_id):
         """
         Stop training
         """
-        trainingInstance = self.user_trainings[user_id]
+        trainingInstance: Training = self.user_trainings[user_id]
         trainingInstance.stop_training()
+        prog = trainingInstance.current_prog()
+        mes = (
+            "paused training" if prog < trainingInstance.epochs else "training finished"
+        )
         return {
-            "message": "pause",
-            "at": trainingInstance.current_prog(),
+            "message": mes,
+            "at": prog,
         }
 
     def reset_training(self, training, user_id, model_id):
         """
         Reset training
         """
-        trainingInstance = self.user_trainings[user_id]
-        trainingInstance.reset_training()
-        return True
+        trainingInstance: Training = self.user_trainings[user_id]
+        return trainingInstance.reset_training()
 
     def get_progress(self, message, user_id, model_id):
         """
         get current progress
         """
         if user_id in self.user_trainings:
-            trainingInstance = self.user_trainings[user_id]
+            trainingInstance: Training = self.user_trainings[user_id]
             if trainingInstance.is_training:
                 return trainingInstance.training_in_steps()
             return trainingInstance.get_progress()
@@ -82,7 +87,7 @@ class TrainingObserver(Observer):
         Update the parameters that have changed
         """
         old_values = {}
-        trainingInstance = self.user_trainings[user_id]
+        trainingInstance: Training = self.user_trainings[user_id]
         if params["use_cuda"] != trainingInstance.use_cuda:
             old_values["use_cuda"] = trainingInstance.use_cuda
             trainingInstance.update_use_cuda(params["use_cuda"])
@@ -99,10 +104,10 @@ class TrainingObserver(Observer):
             old_values["learning_rate"] = trainingInstance.learning_rate
             trainingInstance.update_learning_rate(params["learning_rate"])
         return {
-            "message": "parameters changed",
+            "message": f'changed parameters: {", ".join([str(i) for i in old_values.keys()])}',
             "new_values": params,
             "old_values": old_values,
-            "at": trainingInstance.current_prog(),
+            "at": trainingInstance.current_epoch,
         }
 
     def evaluate_digit(self, image, user_id, model_id):

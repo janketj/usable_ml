@@ -74,20 +74,21 @@ def play_bar():
                         "height": "18px",
                     },
                     "& .MuiSlider-valueLabel": {
-                        "fontSize": 12,
-                        "background": "unset",
-                        "padding": 0,
-                        "height": 20,
-                        "width": 20,
-                        "backgroundColor": COLORS["bg-red"],
-                        "color": "white",
+                        "display": "none",
                     },
                     "& .MuiSlider-mark": {
                         "backgroundColor": "#fff",
-                        "height": 20,
-                        "width": 2,
-                        "border": f'3px solid {COLORS["red"]}',
+                        "height": 24,
+                        "width": 4,
+                        "border": f'4px solid {COLORS["red"]}',
                     },
+                    "& .MuiSlider-markLabel": {
+                        "opacity": 0,
+                        "height": 50,
+                        "width": "40px",
+                        "mt": -6,
+                    },
+                    "& .MuiSlider-markLabel:hover": {"opacity": 1},
                 },
             )
             mui.Button("Save Model", endIcon=mui.icon.Download(), onClick=save_model)
