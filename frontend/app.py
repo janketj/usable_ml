@@ -3,7 +3,7 @@ from streamlit_elements import elements
 import pandas as pd
 import uuid
 from app_style import apply_style
-from functions import init_user, get_progress
+from functions import init_user
 from play_bar import play_bar
 from model_page import model_page
 from train_page import train_page
@@ -11,6 +11,7 @@ from test_page import test_page
 from constants import PLACEHOLDER_MODEL
 from session_state_dumper import get_state, dump_state
 from menu_bar import menu_bar
+from model_loader import model_loader
 
 apply_style()
 
@@ -24,12 +25,7 @@ if user_id is None:
 
 if "model_id" not in st.session_state:
     st.session_state.model_id = PLACEHOLDER_MODEL["id"]
-    st.session_state.loaded_model = {
-        "props": {
-            "value": PLACEHOLDER_MODEL["id"],
-            "children": PLACEHOLDER_MODEL["name"],
-        }
-    }
+    st.session_state.loaded_model = PLACEHOLDER_MODEL["id"]
 
 if "model_name" not in st.session_state:
     st.session_state.model_name = PLACEHOLDER_MODEL["name"]
@@ -46,25 +42,26 @@ if "tab" not in st.session_state:
 
 if "progress" not in st.session_state:
     st.session_state.progress = 0
+    st.session_state.waiting = None
     st.session_state.vis_data = {"accuracy": [], "loss": []}
     dump_state("progress", 0)
     dump_state("vis_data", st.session_state.vis_data)
+
+if "prediction" not in st.session_state:
+    st.session_state.prediction = {"prediction": None, "heatmap": None}
+    dump_state("prediction", st.session_state.prediction)
 
 if "learning_rate" not in st.session_state:
     st.session_state.learning_rate = 0.3
 if "batch_size" not in st.session_state:
     st.session_state.batch_size = 256
 if "epochs" not in st.session_state:
-    st.session_state.epochs = 10
-    st.session_state.epochs_validated = 10
+    st.session_state.epochs = 5
+    st.session_state.epochs_validated = 5
 
 if "optimizer" not in st.session_state:
     st.session_state.optimizer = {
         "props": {"value": "SGD", "children": "Stochastic Gradient Descent"}
-    }
-if "loss_function" not in st.session_state:
-    st.session_state.loss_function = {
-        "props": {"value": "cross_entropy", "children": "Cross Entropy Loss"}
     }
 
 if "use_cuda" not in st.session_state:
@@ -91,21 +88,16 @@ if "existing_models" not in st.session_state:
 if "tab" not in st.session_state:
     st.session_state.tab = "train"
 
-if "predicted_class" not in st.session_state:
-    st.session_state.predicted_class = 0
-
 if "training_events" not in st.session_state:
     st.session_state.training_events = []
     dump_state("training_events", st.session_state.training_events)
 
-st.session_state.training_events = get_state("training_events")
-st.session_state.model = get_state("model")
-st.session_state.existing_models = get_state("existing_models")
-
-
-# train_tab, model_tab, test_tab = st.tabs(["TRAINING", "MODEL", "EVALUATION"])
-st.header("Learning to read Handwritten Digits")
 menu_bar()
+tit, lod = st.columns(2)
+with tit:
+    st.header("Learning to read Handwritten Digits")
+with lod:
+    model_loader()
 if st.session_state.tab == "train":
     with elements("train_tab"):
         train_page()

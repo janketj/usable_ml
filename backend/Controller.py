@@ -110,7 +110,5 @@ class Controller(Observable):
 
         for observer in currentObservers:
             res = observer.update(messageType, message, user_id, model_id)
-            if messageType != "get_progress":
-                print(f"Result: {res}")
             emit_function(messageType, res, room=sid)
 

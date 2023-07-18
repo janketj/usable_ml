@@ -25,7 +25,6 @@ def get_dataset(test: bool = False, indexed: bool = False) -> Dataset:
     transform = torchvision.transforms.Compose(
         [
             torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(mean=(0.1307,), std=(0.3081,)),
         ]
     )
     return MNIST(
@@ -39,6 +38,5 @@ def get_dataset(test: bool = False, indexed: bool = False) -> Dataset:
 
 def get_data_loaders(batch_size: int, test: bool = False):
     dataset = get_dataset(test=test)
-    shuffle = not test
-    loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=shuffle)
+    loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True)
     return loader

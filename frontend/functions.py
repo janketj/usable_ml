@@ -3,6 +3,7 @@ import socketio
 
 from backend.MessageType import MessageType
 from session_state_dumper import dump_state, get_state
+from constants import MODEL_MESSAGES
 
 sio = socketio.Client()
 sio.connect("http://localhost:6000")
@@ -13,21 +14,28 @@ def catch_all(messageType, data=None):
     if messageType == "get_progress":
         update_progress(data)
         return
-    print(f"FRONTEND: Received {messageType} with data {data}")
+    print(f"FRONTEND: Received {messageType}")
+    curr_waiting = get_state("waiting")
+    if curr_waiting == messageType:
+        dump_state("waiting", None)
     if messageType == "update_params":
         add_training_event(data)
     if messageType == "init_user":
         dump_state("existing_models", data["existing_models"])
         dump_state("model", data["defaultModel"])
     if messageType == "create_model":
-        update_existing_models(data["model_id"], data["name"])
+        print(data)
+        update_existing_models(data["id"], data["name"])
         update_model(data)
     if messageType == "start_training":
         add_training_event(data)
     if messageType == "stop_training":
         add_training_event(data)
     if messageType == "evaluate_digit":
-        print(data)
+        print(data["prediction"])
+        dump_state("prediction", data)
+    if messageType in MODEL_MESSAGES:
+        update_model(data)
 
 
 def add_training_event(data):
@@ -53,6 +61,13 @@ def update_model(data):
 
 def update_progress(data):
     vis_data = get_state("vis_data")
+    if len(vis_data["loss"]) > 0 and vis_data["loss"][-1]["x"] > data["progress"]:
+        vis_data["accuracy"] = list(
+            filter(lambda a: (a["x"] <= data["progress"]), vis_data["accuracy"])
+        )
+        vis_data["loss"] = list(
+            filter(lambda a: (a["x"] <= data["progress"]), vis_data["loss"])
+        )
     vis_data["accuracy"] += [{"x": data["progress"], "y": data["accuracy"]}]
     vis_data["loss"] += [{"x": data["progress"], "y": data["loss"]}]
     dump_state("progress", data["progress"])
@@ -65,8 +80,6 @@ def init_user():
 
 def send(msg, receiver: str = "tcp://localhost:5555"):
     messageType = msg["messageType"]
-    if messageType != "get_progress":
-        print("Sending message %s …" % msg)
     sio.emit(messageType, msg)
 
 
@@ -74,7 +87,7 @@ def send_message(messageType: MessageType, message: any = None):
     user_id = st.session_state.user_id
     model_id = st.session_state.model_id
     if messageType != "get_progress":
-        print(f"Sending message {messageType} to {user_id}")
+        st.session_state.waiting = messageType
     send(
         dict(
             messageType=messageType,
@@ -90,13 +103,13 @@ def interrupt():
 
 
 def start_training():
-    send_message(MessageType.START_TRAINING)
     st.session_state.is_training = 1
+    send_message(MessageType.START_TRAINING)
 
 
 def pause_training():
-    send_message(MessageType.STOP_TRAINING)
     st.session_state.is_training = 0
+    send_message(MessageType.STOP_TRAINING)
 
 
 def reset_training():
@@ -108,33 +121,29 @@ def reset_training():
     dump_state("training_events", [])
     send_message(MessageType.RESET_TRAINING)
 
+
 def save_model():
     send_message(MessageType.SAVE_MODEL)
-
-def skip_forward():
-    if "progress" not in st.session_state:
-        st.session_state.progress = {"p": 0, "loss": 100}
-    elif st.session_state.progress["p"] < st.session_state.epochs:
-        st.session_state.progress["p"] += 1
-
-
-def skip_backward():
-    if "progress" not in st.session_state:
-        st.session_state.progress = 0
-    elif st.session_state.progress > 4:
-        st.session_state.progress -= 1
 
 
 def add_block(params):
     send_message(MessageType.ADD_BLOCK, params)
 
 
-def remove_block(block_id):
-    send_message(MessageType.REMOVE_BLOCK, block_id)
+def remove_block(params):
+    send_message(MessageType.REMOVE_BLOCK, params)
 
 
 def edit_block(params):
     send_message(MessageType.EDIT_BLOCK, params)
+
+
+def freeze_block(params):
+    send_message(MessageType.FREEZE_BLOCK_LAYER, params)
+
+
+def unfreeze_block(params):
+    send_message(MessageType.UNFREEZE_BLOCK_LAYER, params)
 
 
 def create_model():
@@ -142,10 +151,9 @@ def create_model():
     send_message(MessageType.CREATE_MODEL, st.session_state.model_name)
 
 
-def load_model():
-    model_id = st.session_state.loaded_model
+def load_model(loaded_model):
     st.session_state.tab = "model"
-    send_message(MessageType.LOAD_MODEL, model_id)
+    send_message(MessageType.LOAD_MODEL, loaded_model)
 
 
 def get_progress():
@@ -154,12 +162,27 @@ def get_progress():
     send_message(MessageType.GET_PROGRESS, st.session_state.progress)
 
 
+def update():
+    st.session_state.training_events = get_state("training_events")
+    st.session_state.model = get_state("model")
+    st.session_state.model_id = st.session_state.model["id"]
+    st.session_state.loaded_model = st.session_state.model["name"]
+    st.session_state.existing_models = get_state("existing_models")
+    st.session_state.prediction = get_state("prediction")
+    st.session_state.training_events = get_state("training_events")
+    st.session_state.waiting = get_state("waiting")
+    if (
+        st.session_state.progress >= st.session_state.epochs
+        and st.session_state.is_training
+    ):
+        pause_training()
+
+
 def update_params():
     values = {
         "learning_rate": st.session_state.learning_rate,
         "epochs": st.session_state.epochs,
         "batch_size": st.session_state.batch_size,
-        "loss_function": st.session_state.loss_function["props"]["value"],
         "optimizer": st.session_state.optimizer["props"]["value"],
         "use_cuda": st.session_state.use_cuda,
     }

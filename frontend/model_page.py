@@ -21,7 +21,7 @@ def model_page():
             "background": COLORS["bg-paper"],
         },
     ):
-        if not st.session_state.model_creator_open:
+        if not st.session_state.model_creator_open and st.session_state.waiting is None:
             with mui.Box(
                 sx={
                     "width": "90%",
@@ -36,7 +36,7 @@ def model_page():
                 },
             ):
                 mui.Typography(
-                    f"MODEL: {st.session_state.model_name}",
+                    f'MODEL: {st.session_state.model["name"]}',
                     sx={"color": COLORS["primary"], "fontSize": "32px"},
                 )
                 with mui.Button(
@@ -51,9 +51,11 @@ def model_page():
                     mui.icon.Add()
 
             mui.Typography(
-                "Layers:",
-                sx={"color": COLORS["primary"], "pt": 2, "pl": 2, "fontSize": "32px"},
+                "Blocks:",
+                sx={"color": COLORS["primary"], "p": 2, "fontSize": "32px"},
             )
+        elif st.session_state.model_creator_open:
+            model_creator()
         with mui.Stack(
             direction="row",
             spacing="16px",
@@ -65,9 +67,6 @@ def model_page():
                 "alignItems": "center",
             },
         ):
-            if st.session_state.model_creator_open:
-                model_creator()
-
             if (
                 not st.session_state.model_creator_open
                 and st.session_state.model

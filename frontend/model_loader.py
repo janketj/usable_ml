@@ -5,33 +5,27 @@ from functions import load_model
 
 
 def model_loader():
-    with mui.FormControl(
-        sx={"width": 700, "display": "flex", "justifyContent": "flex-start"},
-    ):
-        mui.InputLabel("Model", id="loaded_model_label")
-        with mui.Select(
-            name="loaded_model",
-            labelId="loaded_model_label",
-            label="Model",
-            size="small",
-            disablePortal=True,
-            value=st.session_state.loaded_model["props"]["value"],
-            onChange=sync(None, "loaded_model"),
-            sx={"width": 200, "color": "#fff"},
-            inputProps={
-                "name": "loaded_model",
-                "id": "loaded_model",
-            },
-        ):
-            for model_info in st.session_state.existing_models:
-                mui.MenuItem(model_info["name"], value=model_info["id"])
-        if st.session_state.loaded_model["props"]["value"] != st.session_state.model_id:
-            with mui.Button(
-                onClick=load_model,
-                variant="outlined",
-                sx={"width": 170},
-            ):
-                mui.Typography(
-                    "Load Model", sx={"width": "80%", "pt": "4px", "margin": "auto"}
-                )
-                mui.icon.Upload()
+    if len(st.session_state.existing_models) > 1:
+        ex_models = [m["name"] for m in st.session_state.existing_models]
+        lab, sel, but = st.columns([0.175, 0.5, 0.2], gap="small")
+        with lab:
+            st.write("Load an existing model:")
+        with sel:
+            loaded_model = st.selectbox(
+                "# Model",
+                ex_models,
+                index=ex_models.index(st.session_state.model["name"]),
+                label_visibility="collapsed",
+            )
+        with but:
+            def load():
+                load_model(loaded_model)
+            but_type = (
+                "primary" if loaded_model != st.session_state.model_id else "secondary"
+            )
+            st.button(
+                "Load Model",
+                on_click=load,
+                type=but_type,
+                use_container_width=True,
+            )

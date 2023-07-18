@@ -27,7 +27,7 @@ def apply_style():
             width: 100%;
             display: flex;
             flex-direction: column;
-            padding-top: 24px;
+            padding-top: 48px;
             gap: 0;
         }
         [data-testid="column"] {
@@ -45,6 +45,10 @@ def apply_style():
             margin: 0;
             gap: 0;
             line-height: 1;
+        }
+        .row-widget .stSelectbox {
+            position: relative;
+            color: red;
         }
     </style>
     """,

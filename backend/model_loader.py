@@ -9,7 +9,7 @@ models_dir = "models"
 user_models = {}
 
 
-def save_model(model):
+def save_model(model: Model):
     """
     Save the model's state dictionary to a file.
 

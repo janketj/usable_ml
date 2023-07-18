@@ -1,3 +1,5 @@
+from backend.MessageType import MessageType
+
 COLORS = {
     "bg-paper": "rgb(38,39,48)",
     "bg-primary": "rgb(14, 17, 23)",
@@ -10,9 +12,46 @@ COLORS = {
     "red": "#ff4b4b",
 }
 
+LAYER_NAMES = {
+    "conv": "Convolutional",
+    "drop": "Dropout",
+    "activ": "Activation",
+    "pool": "Pooling",
+    "linear": "Linear",
+    "norm": "Normalization",
+}
+
+USED_PARAMS = {
+    "linear_bias": "bias",
+    "conv_padding": "padding",
+    "conv_in_channels": "input channels",
+    "conv_out_channels": "output channels",
+    "conv_kernel_size": "kernel size",
+    "conv_stride": "stride",
+    "conv_bias": "bias",
+    "activ_type": "function",
+    "drop_p": "probability",
+    "pool_type": "type",
+    "pool_kernel_size": "kernel size",
+}
 ACTIVATION_TYPES = ["None", "ReLU", "LeakyReLU", "Sigmoid", "Tanh", "Softmax"]
+
 POOLING_TYPES = ["max", "avg"]
-BLOCK_TYPES = ["Please Select", "FCBlock", "convBlock"]
+
+BLOCK_TYPES = [
+    ["Please Select", "select"],
+    ["Fully Connected (linear) Block", "FCBlock"],
+    ["Convolutional Block", "ConvBlock"],
+]
+
+
+def get_block_type(type):
+    return BLOCK_TYPES[type][0]
+
+
+def get_pool_type(type):
+    return POOLING_TYPES[type][0]
+
 
 PLACEHOLDER_ACCURACY = [
     {
@@ -61,7 +100,10 @@ PLACEHOLDER_LOSS = [
 BLOCK_DEFAULT_PARAMS = {
     "linear_bias": True,
     "linear_in_features": 16,
+    "linear_out_features": 32,
     "conv_padding": 2,
+    "conv_in_channels": 1,
+    "conv_out_channels": 8,
     "conv_kernel_size": 4,
     "conv_stride": 1,
     "conv_dilation": 1,
@@ -75,9 +117,9 @@ BLOCK_DEFAULT_PARAMS = {
     "drop_p": 0.5,
     "drop_inplace": False,
     "use_pool_layer": False,
-    "pool_type": "max",
+    "pool_type": 0,
     "pool_stride": 1,
-    "pool_padding": 2,
+    "pool_padding": 0,
     "pool_kernel_size": 4,
 }
 
@@ -86,3 +128,15 @@ PLACEHOLDER_MODEL = {
     "id": "default",
     "blocks": [],
 }
+
+
+MODEL_MESSAGES = [
+    MessageType.LOAD_MODEL,
+    MessageType.SAVE_MODEL,
+    MessageType.ADD_BLOCK,
+    MessageType.EDIT_BLOCK,
+    MessageType.REMOVE_BLOCK,
+    MessageType.REMOVE_BLOCK_LAYER,
+    MessageType.FREEZE_BLOCK_LAYER,
+    MessageType.UNFREEZE_BLOCK_LAYER,
+]

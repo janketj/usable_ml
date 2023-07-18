@@ -83,9 +83,6 @@ class TrainingObserver(Observer):
         """
         old_values = {}
         trainingInstance = self.user_trainings[user_id]
-        if params["loss_function"] != trainingInstance.loss_function_name:
-            old_values["loss_function"] = trainingInstance.loss_function_name
-            trainingInstance.update_loss_function(params["loss_function"])
         if params["use_cuda"] != trainingInstance.use_cuda:
             old_values["use_cuda"] = trainingInstance.use_cuda
             trainingInstance.update_use_cuda(params["use_cuda"])
@@ -109,5 +106,8 @@ class TrainingObserver(Observer):
         }
 
     def evaluate_digit(self, image, user_id, model_id):
-        print("evaluating digit", self.user_trainings[user_id].predict_class(image))
-        return {"prediction": round(random() * 10), "heatmap": image}
+        pred, heatmap = self.user_trainings[user_id].predict_class(image)
+        return {
+            "prediction": pred,
+            "heatmap": heatmap,
+        }
