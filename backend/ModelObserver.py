@@ -30,8 +30,8 @@ class ModelObserver(Observer):
         """
         Load a model from a file
         """
-        self.user_models[user_id][model_id] = load_model(name)
-        return self.return_model_info(user_id, model_id)
+        self.user_models[user_id][name] = load_model(name)
+        return self.return_model_info(user_id, name)
 
     def save_model(self, name, user_id, model_id):
         """

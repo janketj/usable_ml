@@ -42,7 +42,8 @@ def model_page():
                 with mui.Button(
                     id="create_new_model",
                     variant="outlined",
-                    onClick=start_create_model,sx={"width": 300},
+                    onClick=start_create_model,
+                    sx={"width": 300},
                 ):
                     mui.Typography(
                         "Create New Model",
@@ -72,6 +73,7 @@ def model_page():
                 and st.session_state.model
                 and st.session_state.model["blocks"]
                 and len(st.session_state.model["blocks"]) > 0
+                and st.session_state.waiting is None
             ):
                 b_index = 0
                 block_adder(-1)
@@ -79,5 +81,14 @@ def model_page():
                     block(b, b_index)
                     block_adder(b_index)
                     b_index += 1
-            if st.session_state.model and len(st.session_state.model["blocks"]) < 1:
+            if (
+                st.session_state.model
+                and len(st.session_state.model["blocks"]) < 1
+                and st.session_state.waiting is None
+            ):
                 block_adder(-1)
+            if st.session_state.waiting is not None:
+                mui.Typography(
+                "LOADING...",
+                sx={"color": COLORS["primary"], "p": 2, "fontSize": "32px"},
+            )

@@ -14,7 +14,6 @@ def model_loader():
             loaded_model = st.selectbox(
                 "# Model",
                 ex_models,
-                index=ex_models.index(st.session_state.model["name"]),
                 label_visibility="collapsed",
             )
         with but:

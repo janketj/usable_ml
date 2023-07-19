@@ -11,10 +11,11 @@ def is_jsonable(x):
 
 def dump_state(filename, value):
     with open(f"{filename}.json", "w") as outfile:
+        outfile.truncate(0)
         json.dump(value, outfile)
     return value
 
 def get_state(filename):
-    with open(f"{filename}.json") as json_file:
+    with open(f"{filename}.json", "r") as json_file:
         data = json.load(json_file)
         return data

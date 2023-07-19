@@ -141,7 +141,7 @@ class Model(nn.Module):
             "blockList": self.blockList.to_list(),
             "convolutional_layers": self.convolutional_layers,
             "linear_layers": self.linear_layers,
-            "state_dict": self.state_dict()
+            "state_dict": self.state_dict(),
         }
 
     @classmethod
@@ -164,7 +164,6 @@ class Model(nn.Module):
 
         for block_info in model_dict["blockList"]:
             model.createBlock(block_info)
-
 
         return model
 
@@ -209,6 +208,7 @@ class Model(nn.Module):
 
     def createBlock(self, blockInfo):
         previousBlock = None
+        blockId = blockInfo["id"] if "id" in blockInfo else None
         if blockInfo["previous"] is not None:
             previousBlock = self.findBlockById(
                 id=blockInfo["previous"], name=blockInfo["previous"]
@@ -216,18 +216,18 @@ class Model(nn.Module):
 
         if blockInfo["type"] == "ConvBlock":
             block = self.createConvBlock(
-                blockInfo["name"], previousBlock, blockInfo["layers"]
+                blockInfo["name"], previousBlock, blockInfo["layers"], id=blockId
             )
 
         if blockInfo["type"] == "FCBlock":
             block = self.createFCBlock(
-                blockInfo["name"], previousBlock, blockInfo["layers"]
+                blockInfo["name"], previousBlock, blockInfo["layers"], id=blockId
             )
 
         self.addBlock(block)
 
-    def createConvBlock(self, name, previous, layers):
-        convBlock = ConvBlock(name=name, previous=previous)
+    def createConvBlock(self, name, previous, layers, id=None):
+        convBlock = ConvBlock(name=name, previous=previous, id=id)
 
         convBlock.createConv(layers["conv"])
 
@@ -245,8 +245,8 @@ class Model(nn.Module):
 
         return convBlock
 
-    def createFCBlock(self, name, previous, layers):
-        fcBlock = FCBlock(name=name, previous=previous)
+    def createFCBlock(self, name, previous, layers, id=None):
+        fcBlock = FCBlock(name=name, previous=previous, id=id)
 
         fcBlock.createLinear(layers["linear"])
 

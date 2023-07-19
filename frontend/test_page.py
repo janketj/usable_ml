@@ -12,21 +12,23 @@ from functions import predict_class
 def downsample_by_averaging(
     img: np.ndarray, window_shape: Tuple[int, int]
 ) -> np.ndarray:
-    return (
-        np.average(
-            img.reshape(
-                (
-                    *img.shape[:-2],
-                    img.shape[-2] // window_shape[-2],
-                    window_shape[-2],
-                    img.shape[-1] // window_shape[-1],
-                    window_shape[-1],
-                )
-            ),
-            axis=(-1, -3),
+    if img.shape[0] == 280:
+        return (
+            np.average(
+                img.reshape(
+                    (
+                        *img.shape[:-2],
+                        img.shape[-2] // window_shape[-2],
+                        window_shape[-2],
+                        img.shape[-1] // window_shape[-1],
+                        window_shape[-1],
+                    )
+                ),
+                axis=(-1, -3),
+            )
+            / 256
         )
-        / 256
-    )
+    return np.zeros((28,28))
 
 
 def test_page():
