@@ -2,4 +2,3 @@
 **/MNIST
 models/
 .DS_Store
-*.json
