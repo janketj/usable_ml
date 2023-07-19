@@ -53,7 +53,6 @@ class ModelObserver(Observer):
         """
         Create a block
         """
-        print(block, user_id, model_id)
         self.user_models[user_id][model_id].createBlock(block)
         return self.return_model_info(user_id, model_id)
 

@@ -128,6 +128,46 @@ class Model(nn.Module):
             self.createBlock(DEFAULT_FC_BLOCK2)
         self.convolutional_layers, self.linear_layers = self.blockList.to_layers()
 
+    def to_dict_state(self):
+        """
+        Convert the model to a dictionary representation.
+
+        Returns:
+            The dictionary representation of the model.
+        """
+        return {
+            "name": self.name,
+            "id": self.id,
+            "blockList": self.blockList.to_list(),
+            "convolutional_layers": self.convolutional_layers,
+            "linear_layers": self.linear_layers,
+            "state_dict": self.state_dict()
+        }
+
+    @classmethod
+    def from_dict(cls, model_dict):
+        """
+        Create a model instance from a dictionary representation.
+
+        Args:
+            model_dict: The dictionary representation of the model.
+
+        Returns:
+            The created model instance.
+        """
+        model = cls(model_dict["name"])
+        model.id = model_dict["id"]
+        model.blockList = BlockList()
+        model.convolutional_layers = model_dict["convolutional_layers"]
+        model.linear_layers = model_dict["linear_layers"]
+        model.load_state_dict(model_dict["state_dict"])
+
+        for block_info in model_dict["blockList"]:
+            model.createBlock(block_info)
+
+
+        return model
+
     def to_dict(self):
         return dict(name=self.name, id=self.id, blocks=self.blockList.to_list())
 
