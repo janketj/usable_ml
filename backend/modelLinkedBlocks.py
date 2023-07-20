@@ -97,6 +97,19 @@ DEFAULT_FC_BLOCK2 = {
     },
 }
 
+DEFAULT_FC_BLOCK3 = {
+    "type": "FCBlock",
+    "name": "Linear_1",
+    "previous": None,
+    "layers": {
+        "linear": {
+            "in_features": 784,
+            "out_features": 10,
+            "bias": False,
+        }
+    },
+}
+
 
 class BlockList(list):
     def to_list(self):
@@ -126,6 +139,8 @@ class Model(nn.Module):
             self.createBlock(DEFAULT_CONV_BLOCK2)
             self.createBlock(DEFAULT_FC_BLOCK1)
             self.createBlock(DEFAULT_FC_BLOCK2)
+        if name == "model1":
+            self.createBlock(DEFAULT_FC_BLOCK3)
         self.convolutional_layers, self.linear_layers = self.blockList.to_layers()
 
     def to_dict_state(self):

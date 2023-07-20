@@ -111,12 +111,10 @@ class TrainingObserver(Observer):
         }
 
     def evaluate_digit(self, image, user_id, model_id):
-        pred, heatmap = self.user_trainings[user_id].predict_class(image)
-        return {
-            "prediction": pred,
-            "heatmap": heatmap,
-        }
-    def evaluate_digits(self, images,user_id, model_id):
+        pred, heatmap, confidence = self.user_trainings[user_id].predict_class(image)
+        return {"prediction": pred, "heatmap": heatmap, "confidence": confidence}
+
+    def evaluate_digits(self, images, user_id, model_id):
         predictions = []
         for i in images:
             pred, heat = self.user_trainings[user_id].predict_class(i)

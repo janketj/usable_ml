@@ -9,8 +9,8 @@ def update_predictions():
 
 def current_example():
     event.Interval(5, update_predictions)
-    with mui.Box(sx={"display": "flex"}):
-        if st.session_state.is_training:
+    with mui.Box(sx={"display": "flex", "width": "100%", "justifyContent": "space-between"}):
+        if st.session_state.is_training and st.session_state.progress > 0.1:
             digit = get_state(st.session_state.current_prediction)
             with mui.Box():
                 with mui.Box(
@@ -35,4 +35,5 @@ def current_example():
                                     "position": "absolute",
                                 }
                             )
-                mui.Typography(st.session_state.current_prediction, sx={"fontSize": "20px", "width": "140px", "alignItems": "center"})
+            mui.Typography("Current Prediction: ", st.session_state.current_prediction, sx={"fontSize": "28px", "width": "140px", "alignItems": "center", "margin": "auto"})
+            mui.Button("update", onClick=update_predictions)

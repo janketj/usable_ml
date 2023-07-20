@@ -7,6 +7,7 @@ COLORS = {
     "bg-light": "rgb(30, 30, 40)",
     "bg-box": "rgb(1, 1, 90)",
     "bg-red": "rgb(91,26,26)",
+    "bg-red2": "rgb(60,26,26)",
     "primary": "#fff",
     "secondary": "#a8a8a8",
     "red": "#ff4b4b",

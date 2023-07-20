@@ -1,15 +1,22 @@
 import streamlit as st
 from streamlit_elements import elements, mui, sync
+from constants import COLORS
 
 
 def menu_bar():
     with elements("menu_bar"):
         with mui.Box(
-            sx={"width": "100%", "display": "flex", "m": 0, "p": 0},
+            sx={
+                "width": "100%",
+                "display": "flex",
+                "m": 0,
+                "p": 0,
+                "background": COLORS["bg-red2"],
+            },
         ):
             with mui.ToggleButtonGroup(
                 variant="outlined",
-                color="primary",
+                color="warning",
                 value=st.session_state.tab,
                 onChange=sync(None, "tab"),
                 exclusive=True,
@@ -22,7 +29,7 @@ def menu_bar():
                     value="train",
                     sx={
                         "width": 700,
-                        "fontSize": "24px",
+                        "fontSize": "28px",
                         "display": "flex",
                         "justifyContent": "space-evenly",
                     },
@@ -33,7 +40,7 @@ def menu_bar():
                     value="model",
                     sx={
                         "width": 700,
-                        "fontSize": "24px",
+                        "fontSize": "28px",
                         "display": "flex",
                         "justifyContent": "space-evenly",
                     },
@@ -44,7 +51,7 @@ def menu_bar():
                     value="eval",
                     sx={
                         "width": 700,
-                        "fontSize": "24px",
+                        "fontSize": "28px",
                         "display": "flex",
                         "justifyContent": "space-evenly",
                     },

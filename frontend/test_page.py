@@ -10,7 +10,6 @@ from functions import predict_class
 from os.path import exists
 
 
-
 def downsample_by_averaging(
     img: np.ndarray, window_shape: Tuple[int, int]
 ) -> np.ndarray:
@@ -89,12 +88,27 @@ def test_page():
                 f'<h1 style="font-size:120px;color:#ff4b4b"> {st.session_state.prediction["prediction"]} </h1>',
                 unsafe_allow_html=True,
             )
+            st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
+            confidences = np.array(st.session_state.prediction["confidence"][0])
+            norm = np.linalg.norm(confidences)
+            minimum = min(confidences)
+            for i in range(10):
+                conf = round(confidences[i], 2)
+                is_pred = (
+                    "MAX" if i == st.session_state.prediction["prediction"] else ""
+                )
+                st.markdown(
+                    f'<b style="font-size:24px; padding-right:4px;">{i}: </b><i style="font-size:20px;color:#fff;opacity:{max(0.3,(conf- minimum)/ norm)}">{conf}  {is_pred}</i>',
+                    unsafe_allow_html=True,
+                )
 
     with col3:
         st.header("Important Pixels")
         st.markdown(
             "<p style='padding-top:10px'> This image shows which pixels were important \
-                in the prediction. Red means that the pixel(s) had positive contribution to the classification, blue means negative contribution</p>",
+            in the prediction. Red means that the pixel(s) had positive contribution to the classification, blue means negative contribution.\
+            The method used for the calculation of this heatmap is called Layerwise Relevance Propagation (LRP).\
+            It aggregates how much each pixel contributed to the prediction.</p>",
             unsafe_allow_html=True,
         )
         st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
@@ -104,5 +118,5 @@ def test_page():
                 heatmap,
                 width=280,
             )
-            if not exists(f'{st.session_state.prediction["prediction"]}.pkl'):
-                dump_state(st.session_state.prediction["prediction"], pixel_data)
+            """ if not exists(f'{st.session_state.prediction["prediction"]}.pkl'):
+                dump_state(st.session_state.prediction["prediction"], pixel_data) """

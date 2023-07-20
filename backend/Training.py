@@ -112,7 +112,13 @@ class Training:
         )
         heatmap = relevance.tolist()
 
-        return int(out.argmax(dim=1)), heatmap
+        self.model.eval()
+        with torch.no_grad():
+            raw_image = np.array(data, dtype = np.float32)
+            image = torch.reshape(torch.from_numpy(raw_image), (1, 1, 28, 28))
+            res = self.model(image)
+
+        return int(out.argmax(dim=1)), heatmap, res.tolist()
 
     def current_prog(self):
         return self.current_epoch + (
