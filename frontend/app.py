@@ -45,6 +45,7 @@ if "progress" not in st.session_state:
     st.session_state.waiting = None
     st.session_state.vis_data = {"accuracy": [], "loss": []}
     dump_state("progress", 0)
+    dump_state("waiting", None)
     dump_state("vis_data", st.session_state.vis_data)
 
 if "prediction" not in st.session_state:

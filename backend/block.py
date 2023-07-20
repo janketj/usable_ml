@@ -6,10 +6,12 @@ from typing import Tuple
 
 
 class Block(nn.Module):
-    def __init__(self, name, previous):
+    def __init__(self, name, previous, id=None):
         super().__init__()
-
-        self.id = str(uuid.uuid4())
+        if id is None:
+            self.id = str(uuid.uuid4())
+        else:
+            self.id = id
 
         self.name = name
 
@@ -232,8 +234,8 @@ class Block(nn.Module):
 
 
 class ConvBlock(Block):
-    def __init__(self, name, previous):
-        super().__init__(name, previous)
+    def __init__(self, name, previous, id=None):
+        super().__init__(name, previous, id)
 
         self.type = "ConvBlock"
 
@@ -246,19 +248,17 @@ class ConvBlock(Block):
         self.outputDim = None
         if previous is not None:
             self.previous = previous.id
-            if isinstance(self.previous_output_dim, Tuple): 
+            if isinstance(self.previous_output_dim, Tuple):
                 self.previous_output_dim = previous.outputDim
 
     def getLayers(self):
         pool_layer = None
-        if self.poolParams:
-            pool_layer =  {"type": self.poolParams["type"]} | self.poolParams["params"]
         layers = {
             "conv": self.convParams,
             "norm": self.normParams,
             "activ": self.activParams,
             "drop": self.dropParams,
-            "pool": pool_layer,
+            "pool": self.poolParams,
         }
         return layers
 
@@ -465,8 +465,8 @@ class ConvBlock(Block):
 
 
 class FCBlock(Block):
-    def __init__(self, name, previous):
-        super().__init__(name, previous)
+    def __init__(self, name, previous, id=None):
+        super().__init__(name, previous, id=None)
 
         self.type = "FCBlock"
 
@@ -479,7 +479,7 @@ class FCBlock(Block):
             self.previous = previous.id
             self.previous_output_dim = previous.outputDim
         else:
-            self.previous_output_dim = 1
+            self.previous_output_dim = 28 * 28
 
     def getLayers(self):
         layers = {

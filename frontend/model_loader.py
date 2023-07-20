@@ -6,6 +6,8 @@ from functions import load_model
 
 def model_loader():
     if len(st.session_state.existing_models) > 1:
+        if "existing_models" not in st.session_state:
+            st.session_state.existing_models = []
         ex_models = [m["name"] for m in st.session_state.existing_models]
         lab, sel, but = st.columns([0.175, 0.5, 0.2], gap="small")
         with lab:
@@ -14,7 +16,6 @@ def model_loader():
             loaded_model = st.selectbox(
                 "# Model",
                 ex_models,
-                index=ex_models.index(st.session_state.model["name"]),
                 label_visibility="collapsed",
             )
         with but:

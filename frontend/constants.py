@@ -23,6 +23,8 @@ LAYER_NAMES = {
 
 USED_PARAMS = {
     "linear_bias": "bias",
+    "linear_in_features": "input features",
+    "linear_out_features": "output features",
     "conv_padding": "padding",
     "conv_in_channels": "input channels",
     "conv_out_channels": "output channels",

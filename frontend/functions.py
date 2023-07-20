@@ -12,7 +12,6 @@ sio.connect("http://localhost:6000")
 @sio.on("*")
 def catch_all(messageType, data=None):
     if messageType == "get_progress":
-        print(data["progress"])
         update_progress(data)
         return
     print(f"FRONTEND: Received {messageType}")
@@ -25,21 +24,19 @@ def catch_all(messageType, data=None):
         dump_state("existing_models", data["existing_models"])
         dump_state("model", data["defaultModel"])
     if messageType == "create_model":
-        print(data)
         update_existing_models(data["id"], data["name"])
-        update_model(data)
+        dump_state("model", data)
     if messageType == "start_training":
         add_training_event(data)
     if messageType == "stop_training":
         add_training_event(data)
     if messageType == "evaluate_digit":
-        print(data["prediction"])
         dump_state("prediction", data)
     if messageType == "reset_training":
         dump_state("training_events", [])
         update_progress(data)
     if messageType in MODEL_MESSAGES:
-        update_model(data)
+        dump_state("model", data)
 
 
 def add_training_event(data):
@@ -54,13 +51,9 @@ def add_training_event(data):
 
 def update_existing_models(new_model_id, new_model_name):
     existing_models = get_state("existing_models")
-
-    existing_models += [{"id": new_model_id, "name": new_model_name}]
-    dump_state("existing_models", existing_models)
-
-
-def update_model(data):
-    dump_state("model", data)
+    if all([x["id"] != new_model_id for x in existing_models]):
+        existing_models += [{"id": new_model_id, "name": new_model_name}]
+        dump_state("existing_models", existing_models)
 
 
 def update_progress(data):
@@ -168,13 +161,14 @@ def get_progress():
 
 
 def update():
-    st.session_state.training_events = get_state("training_events")
-    st.session_state.model = get_state("model")
-    st.session_state.model_id = st.session_state.model["id"]
-    st.session_state.loaded_model = st.session_state.model["name"]
-    st.session_state.existing_models = get_state("existing_models")
-    st.session_state.prediction = get_state("prediction")
     st.session_state.waiting = get_state("waiting")
+    st.session_state.training_events = get_state("training_events")
+    if st.session_state.waiting != "load_model":
+        st.session_state.model = get_state("model")
+        st.session_state.model_id = st.session_state.model["id"]
+        st.session_state.loaded_model = st.session_state.model["name"]
+        st.session_state.existing_models = get_state("existing_models")
+    st.session_state.prediction = get_state("prediction")
     if (
         st.session_state.progress >= st.session_state.epochs
         and st.session_state.is_training
