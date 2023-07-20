@@ -89,16 +89,14 @@ def test_page():
                 unsafe_allow_html=True,
             )
             st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
-            confidences = np.array(st.session_state.prediction["confidence"][0])
-            norm = np.linalg.norm(confidences)
-            minimum = min(confidences)
+            confidences = st.session_state.prediction["confidence"]
             for i in range(10):
-                conf = round(confidences[i], 2)
+                conf = round(confidences[i] , 2)
                 is_pred = (
-                    "MAX" if i == st.session_state.prediction["prediction"] else ""
+                    "#" if i == st.session_state.prediction["prediction"] else ""
                 )
                 st.markdown(
-                    f'<b style="font-size:24px; padding-right:4px;">{i}: </b><i style="font-size:20px;color:#fff;opacity:{max(0.3,(conf- minimum)/ norm)}">{conf}  {is_pred}</i>',
+                    f'<b style="font-size:24px; padding-right:4px;"> {i}: </b><i style="font-size:20px;color:#fff;opacity:{min(1.0,max(0.3,confidences[i] *4))}">{conf} {is_pred}</i>',
                     unsafe_allow_html=True,
                 )
 

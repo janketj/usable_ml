@@ -87,7 +87,7 @@ def train_page():
                     "learning_rate",
                     type="slider",
                     sliderRange=[0.01, 1],
-                    step=0.02,
+                    step=0.01,
                     subtitle="How much of the current batch should be remembered",
                     tooltip="In each iteration of a neural network the weights or all neurons in all hidden layers are updated in the direction, \
                         which decreases the prediction error by the optimizer. If the learning rate is low, the weights of the neural network \

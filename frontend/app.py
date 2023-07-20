@@ -29,7 +29,7 @@ if "model" not in st.session_state:
     st.session_state.loaded_model = PLACEHOLDER_MODEL["id"]
     st.session_state.model_name = PLACEHOLDER_MODEL["name"]
     st.session_state.model_name_new = ""
-    st.session_state.current_prediction = "3"
+    st.session_state.current_prediction = get_state("1")
 
 if "user_id" not in st.session_state:
     st.session_state.user_id = user_id
@@ -50,7 +50,7 @@ if "progress" not in st.session_state:
     dump_state("vis_data", st.session_state.vis_data)
 
 if "prediction" not in st.session_state:
-    st.session_state.prediction = {"prediction": None, "heatmap": None}
+    st.session_state.prediction = {"prediction": None, "heatmap": None, "confidence":[[]]}
     dump_state("prediction", st.session_state.prediction)
 
 if "learning_rate" not in st.session_state:

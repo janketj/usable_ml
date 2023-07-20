@@ -27,6 +27,13 @@ def global_parameter(
     ):
         if type == "slider":
             with mui.Box(sx={"display": "flex", "justifyContent": "space-between"}):
+
+                def handle_change(event):
+                    if event.target.value != "":
+                        st.session_state[key] = float(event.target.value)
+                    else:
+                        st.session_state[key] = event.target.value
+
                 mui.Box(
                     mui.Typography(name),
                     mui.Typography(
@@ -38,16 +45,16 @@ def global_parameter(
                     ),
                     sx={"width": "50%", "margin": "auto"},
                 )
-                mui.TextField(
-                    name=key,
+                mui.Input(
                     label=name,
                     type="number",
                     value=st.session_state[key],
-                    onChange=sync(None, key),
+                    onChange=handle_change,
                     valueLabelDisplay="auto",
+                    size="small",
                     min=sliderRange[0],
                     max=sliderRange[1],
-                    size="small",
+                    step=step,
                     sx={
                         "width": "45%",
                         "height": "40px",

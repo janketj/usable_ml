@@ -88,11 +88,11 @@ class Training:
         self.accuracy = 0
         with torch.no_grad():
             for layer in self.model.children():
-                if hasattr(layer, 'reset_parameters'):
+                if hasattr(layer, "reset_parameters"):
                     layer.reset_parameters()
-                elif hasattr(layer, 'children'):
+                elif hasattr(layer, "children"):
                     for lchildren in layer.children():
-                        if hasattr(lchildren, 'reset_parameters'):
+                        if hasattr(lchildren, "reset_parameters"):
                             lchildren.reset_parameters()
         self.train_iter = iter(self.train_loader)
         return {
@@ -114,9 +114,11 @@ class Training:
 
         self.model.eval()
         with torch.no_grad():
-            raw_image = np.array(data, dtype = np.float32)
+            raw_image = np.array(data, dtype=np.float32)
             image = torch.reshape(torch.from_numpy(raw_image), (1, 1, 28, 28))
             res = self.model(image)
+            res = np.array(res[0])
+            res = res / np.linalg.norm(res)
 
         return int(out.argmax(dim=1)), heatmap, res.tolist()
 

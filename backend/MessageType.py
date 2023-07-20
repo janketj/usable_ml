@@ -18,7 +18,6 @@ class MessageType(str, Enum):
     GET_PROGRESS = "get_progress"
     RESET_TRAINING = "reset_training"
     EVALUATE_DIGIT= "evaluate_digit"
-    EVALUATE_DIGITS="evaluate_digits"
     EVALUATE_TESTSET = "evaluate_testset",
 
     def __str__(self) -> str:

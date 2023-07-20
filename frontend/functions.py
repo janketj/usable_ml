@@ -19,25 +19,27 @@ def catch_all(messageType, data=None):
     curr_waiting = get_state("waiting")
     if curr_waiting == messageType:
         dump_state("waiting", None)
-    if messageType == "update_params":
+    if messageType == MessageType.UPDATE_PARAMS:
         add_training_event(data)
-    if messageType == "init_user":
+    if messageType == MessageType.INIT_USER:
         dump_state("existing_models", data["existing_models"])
         dump_state("model", data["defaultModel"])
-    if messageType == "create_model":
+    if messageType == MessageType.CREATE_MODEL:
         update_existing_models(data["id"], data["name"])
         dump_state("model", data)
-    if messageType == "start_training":
+    if messageType == MessageType.START_TRAINING:
         add_training_event(data)
-    if messageType == "stop_training":
+    if messageType == MessageType.STOP_TRAINING:
         add_training_event(data)
-    if messageType == "evaluate_digit":
+    if messageType == MessageType.EVALUATE_DIGIT:
+        print(data["prediction"])
         dump_state("prediction", data)
-    if messageType == "reset_training":
+    if messageType == MessageType.RESET_TRAINING:
         dump_state("training_events", [])
         update_progress(data)
     if messageType in MODEL_MESSAGES:
         dump_state("model", data)
+
 
 
 def add_training_event(data):
@@ -179,15 +181,16 @@ def update():
 
 def update_params():
     values = {
-        "learning_rate": st.session_state.learning_rate,
-        "epochs": st.session_state.epochs,
-        "batch_size": st.session_state.batch_size,
+        "learning_rate": float(st.session_state.learning_rate),
+        "epochs": int(st.session_state.epochs),
+        "batch_size":  int(st.session_state.batch_size),
         "optimizer": st.session_state.optimizer["props"]["value"],
         "use_cuda": st.session_state.use_cuda,
     }
-    st.session_state.epochs_validated = st.session_state.epochs
+    st.session_state.epochs_validated = int(st.session_state.epochs)
     send_message(MessageType.UPDATE_PARAMS, values)
 
 
 def predict_class(image):
     send_message(MessageType.EVALUATE_DIGIT, image)
+

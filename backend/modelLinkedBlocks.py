@@ -92,7 +92,7 @@ DEFAULT_FC_BLOCK2 = {
         "linear": {
             "in_features": 32,
             "out_features": 10,
-            "bias": True,
+            "bias": False,
         }
     },
 }
