@@ -5,8 +5,10 @@ import numpy as np
 from typing import Tuple
 from session_state_dumper import get_state
 from zennit.image import imgify
-
+from session_state_dumper import dump_state
 from functions import predict_class
+from os.path import exists
+
 
 
 def downsample_by_averaging(
@@ -28,7 +30,7 @@ def downsample_by_averaging(
             )
             / 256
         )
-    return np.zeros((28,28))
+    return np.zeros((28, 28))
 
 
 def test_page():
@@ -102,3 +104,5 @@ def test_page():
                 heatmap,
                 width=280,
             )
+            if not exists(f'{st.session_state.prediction["prediction"]}.pkl'):
+                dump_state(st.session_state.prediction["prediction"], pixel_data)

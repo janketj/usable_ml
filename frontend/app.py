@@ -29,6 +29,7 @@ if "model" not in st.session_state:
     st.session_state.loaded_model = PLACEHOLDER_MODEL["id"]
     st.session_state.model_name = PLACEHOLDER_MODEL["name"]
     st.session_state.model_name_new = ""
+    st.session_state.current_prediction = "3"
 
 if "user_id" not in st.session_state:
     st.session_state.user_id = user_id

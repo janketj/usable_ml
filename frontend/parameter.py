@@ -26,36 +26,36 @@ def global_parameter(
         }
     ):
         if type == "slider":
-            mui.Box(
-                mui.Typography(name),
-                mui.IconButton(mui.icon.Info(), title=tooltip.replace("  ", "")),
-                sx={"display": "flex", "justifyContent": "space-between"},
-            )
-            mui.Typography(subtitle, sx={"fontSize": 14, "color": COLORS["secondary"]})
             with mui.Box(sx={"display": "flex", "justifyContent": "space-between"}):
-                mui.Slider(
+                mui.Box(
+                    mui.Typography(name),
+                    mui.Typography(
+                        subtitle,
+                        sx={
+                            "fontSize": 14,
+                            "color": COLORS["secondary"],
+                        },
+                    ),
+                    sx={"width": "50%", "margin": "auto"},
+                )
+                mui.TextField(
                     name=key,
                     label=name,
+                    type="number",
                     value=st.session_state[key],
                     onChange=sync(None, key),
                     valueLabelDisplay="auto",
                     min=sliderRange[0],
                     max=sliderRange[1],
                     size="small",
-                    marks=[
-                        {
-                            "value": sliderRange[0],
-                            "label": sliderRange[0],
-                        },
-                        {
-                            "value": sliderRange[1],
-                            "label": sliderRange[1],
-                        },
-                    ],
-                    step=step,
-                    sx={"width": "90%", "ml": "12px"},
+                    sx={
+                        "width": "45%",
+                        "height": "40px",
+                        "margin": "auto",
+                        "mr": "28px",
+                    },
                 )
-                mui.Typography(st.session_state[key], sx={"width": "5%", "pt": "6px"})
+                mui.IconButton(mui.icon.Info(), title=tooltip.replace("  ", ""))
         if type == "select":
             with mui.Box(sx={"display": "flex", "justifyContent": "space-between"}):
                 mui.Box(

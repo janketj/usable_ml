@@ -55,6 +55,7 @@ if __name__ == "__main__":
     controller.register(MessageType.UPDATE_PARAMS, training_observer)
     controller.register(MessageType.GET_PROGRESS, training_observer)
     controller.register(MessageType.EVALUATE_DIGIT, training_observer)
+    controller.register(MessageType.EVALUATE_DIGITS, training_observer)
 
     workerProcess = Process(target=controller.start)
     workerProcess.start()

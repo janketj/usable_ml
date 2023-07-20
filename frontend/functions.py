@@ -4,6 +4,7 @@ import socketio
 from backend.MessageType import MessageType
 from session_state_dumper import dump_state, get_state
 from constants import MODEL_MESSAGES
+import random
 
 sio = socketio.Client()
 sio.connect("http://localhost:6000")
