@@ -13,7 +13,7 @@ def nivo_timechart(data, name, height, margin=0, maxY=100):
                 "data": data,
             }
         ],
-        pointSize=8,
+        pointSize=0,
         margin={"left": 50, "right": 8, "top": 5, "bottom": margin},
         axisBottom={
             "tickSize": 5,

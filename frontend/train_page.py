@@ -4,7 +4,7 @@ from functions import update_params
 from parameter import global_parameter
 from constants import PLACEHOLDER_ACCURACY, PLACEHOLDER_LOSS, COLORS
 from nivo_timechart import nivo_timechart
-
+from current_example import current_example
 
 def train_page():
     with mui.Box(
@@ -32,7 +32,14 @@ def train_page():
                     "width": "100%",
                 },
             )
-            with mui.Stack(direction="column", sx={"paddingTop": "8px"}, spacing="8px"):
+            with mui.Stack(
+                direction="column",
+                sx={
+                    "paddingTop": "8px",
+                    "minHeight": 600,
+                },
+                spacing="8px",
+            ):
                 global_parameter(
                     "Epochs",
                     "epochs",
@@ -80,7 +87,7 @@ def train_page():
                     "learning_rate",
                     type="slider",
                     sliderRange=[0.01, 1],
-                    step=0.02,
+                    step=0.01,
                     subtitle="How much of the current batch should be remembered",
                     tooltip="In each iteration of a neural network the weights or all neurons in all hidden layers are updated in the direction, \
                         which decreases the prediction error by the optimizer. If the learning rate is low, the weights of the neural network \
@@ -95,16 +102,19 @@ def train_page():
                         sx={"fontSize": 14, "color": COLORS["secondary"]},
                     ),
                     mui.Button(
-                        mui.Typography(
-                            "Update Parameters", sx={"width": "80%"}
-                        ),
+                        mui.Typography("Update Parameters", sx={"width": "80%"}),
                         endIcon=mui.icon.Send(),
                         onClick=update_params,
                         variant="outlined",
                         sx={"width": 300},
                     ),
-                    sx={"display": "flex", "justifyContent": "space-between", "padding": "16px"},
+                    sx={
+                        "display": "flex",
+                        "justifyContent": "space-between",
+                        "padding": "16px",
+                    },
                 )
+                current_example()
 
         with mui.Stack(
             sx={"width": "60%", "maxHeight": 500, "height": 500, "margin": "16px"}
@@ -117,7 +127,16 @@ def train_page():
                     mui.icon.Info(),
                     title="The accuracy is computed on the test dataset. It is the percentage of test samples for which the prediction was correct.",
                 ),
-                sx={"display": "flex", "justifyContent": "space-between"},
+                sx={
+                    "display": "flex",
+                    "justifyContent": "space-between",
+                    "m": 0,
+                    "p": 0,
+                },
+            )
+            mui.Typography(
+                "The accuracy is computed on the test dataset. It is the percentage of test samples for which the prediction was correct.",
+                sx={"color": COLORS["secondary"]},
             )
             nivo_timechart(acc, "Accuracy", 300, margin=50)
             mui.Box(
@@ -126,8 +145,14 @@ def train_page():
                     mui.icon.Info(),
                     title="The loss refers to a measure of how well the network's predictions align with the true values or labels of the training data. \
                         It is the difference between the actual labels and the predicted labels. For the handwritten digits dataset MNIST the loss should \
-                        be initially between 2 and 4 and can come very close to 0 as training goes on.".replace("  ",""),
+                        be initially between 2 and 4 and can come very close to 0 as training goes on.".replace(
+                        "  ", ""
+                    ),
                 ),
                 sx={"display": "flex", "justifyContent": "space-between"},
+            )
+            mui.Typography(
+                "The loss refers to the difference between the actual labels and the predicted labels.",
+                sx={"color": COLORS["secondary"]},
             )
             nivo_timechart(loss, "Loss", 200, margin=60, maxY=5)

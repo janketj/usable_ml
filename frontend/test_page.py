@@ -5,8 +5,9 @@ import numpy as np
 from typing import Tuple
 from session_state_dumper import get_state
 from zennit.image import imgify
-
+from session_state_dumper import dump_state
 from functions import predict_class
+from os.path import exists
 
 
 def downsample_by_averaging(
@@ -28,7 +29,7 @@ def downsample_by_averaging(
             )
             / 256
         )
-    return np.zeros((28,28))
+    return np.zeros((28, 28))
 
 
 def test_page():
@@ -87,12 +88,25 @@ def test_page():
                 f'<h1 style="font-size:120px;color:#ff4b4b"> {st.session_state.prediction["prediction"]} </h1>',
                 unsafe_allow_html=True,
             )
+            st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
+            confidences = st.session_state.prediction["confidence"]
+            for i in range(10):
+                conf = round(confidences[i] , 2)
+                is_pred = (
+                    "#" if i == st.session_state.prediction["prediction"] else ""
+                )
+                st.markdown(
+                    f'<b style="font-size:24px; padding-right:4px;"> {i}: </b><i style="font-size:20px;color:#fff;opacity:{min(1.0,max(0.3,confidences[i] *4))}">{conf} {is_pred}</i>',
+                    unsafe_allow_html=True,
+                )
 
     with col3:
         st.header("Important Pixels")
         st.markdown(
             "<p style='padding-top:10px'> This image shows which pixels were important \
-                in the prediction. Red means that the pixel(s) had positive contribution to the classification, blue means negative contribution</p>",
+            in the prediction. Red means that the pixel(s) had positive contribution to the classification, blue means negative contribution.\
+            The method used for the calculation of this heatmap is called Layerwise Relevance Propagation (LRP).\
+            It aggregates how much each pixel contributed to the prediction.</p>",
             unsafe_allow_html=True,
         )
         st.markdown("<i style='padding:10px'></i>", unsafe_allow_html=True)
@@ -102,3 +116,5 @@ def test_page():
                 heatmap,
                 width=280,
             )
+            """ if not exists(f'{st.session_state.prediction["prediction"]}.pkl'):
+                dump_state(st.session_state.prediction["prediction"], pixel_data) """

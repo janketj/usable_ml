@@ -111,8 +111,6 @@ class TrainingObserver(Observer):
         }
 
     def evaluate_digit(self, image, user_id, model_id):
-        pred, heatmap = self.user_trainings[user_id].predict_class(image)
-        return {
-            "prediction": pred,
-            "heatmap": heatmap,
-        }
+        pred, heatmap, confidence = self.user_trainings[user_id].predict_class(image)
+        return {"prediction": pred, "heatmap": heatmap, "confidence": confidence}
+
